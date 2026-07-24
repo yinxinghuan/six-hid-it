@@ -6,8 +6,9 @@
 
 ## 2. 目录结构
 
-- `index.html`：评审页结构、Little 6 角色依据、游戏切片与商品购买链接。
-- `play.html`：公开发布使用的独立游戏入口，与评审页共用游戏代码和视觉资源；`body.standalone-game` 会移除评审专用的手机外框、圆角和投影。
+- `index.html`：平台与 GitHub Pages 根目录使用的正式游戏入口；`body.standalone-game` 会移除评审专用的手机外框、圆角和投影。
+- `review.html`：评审页结构、Little 6 角色依据、游戏切片与商品购买链接。
+- `play.html`：旧测试链接的兼容跳转页，立即转到正式根入口 `./`。
 - `src/style.css`：暖白静物视觉系统、猫版画整合、钛杯与冰花资产、移动端布局。
 - `src/assets/little6-papercut.svg`：游戏内黑白开脸剪纸猫头，眼睛与脸部为同一矢量坐标系。
 - `src/assets/titanium-cup-inverted.svg`：静置倒扣视角，只绘制封闭杯底、金属杯身和贴桌杯口的前侧薄边，不绘制杯口内腔。

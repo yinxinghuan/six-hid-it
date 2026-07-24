@@ -6,8 +6,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        review: fileURLToPath(new URL('./index.html', import.meta.url)),
-        play: fileURLToPath(new URL('./play.html', import.meta.url)),
+        game: fileURLToPath(new URL('./index.html', import.meta.url)),
+        review: fileURLToPath(new URL('./review.html', import.meta.url)),
+        legacyPlay: fileURLToPath(new URL('./play.html', import.meta.url)),
       },
     },
   },
