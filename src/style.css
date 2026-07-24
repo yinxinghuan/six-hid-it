@@ -1068,3 +1068,31 @@ body.standalone-game{
   .phone[data-phase="shuffle"] .game-cat{transform:translateY(39px)}
   .phone[data-phase="choose"] .game-cat{transform:translateY(2px)}
 }
+
+/* Larger tuxedo paw: more visible sleeve and a fuller white mitten. */
+.paw{
+  left:-354px;
+  top:254px;
+  width:430px;
+  height:56px;
+  border-radius:0 30px 30px 0;
+  clip-path:polygon(0 9%,86% 12%,100% 28%,100% 78%,86% 91%,0 96%);
+}
+.paw:before{
+  right:0;
+  top:4px;
+  width:58px;
+  height:48px;
+  border-radius:46% 54% 51% 47%;
+}
+.paw i{
+  right:11px;
+  top:19px;
+  width:11px;
+  height:1px;
+  box-shadow:0 8px rgba(46,43,40,.3),-15px -5px rgba(46,43,40,.25);
+}
+.paw.from-right{
+  left:auto;
+  right:-354px;
+}
