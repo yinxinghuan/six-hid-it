@@ -535,8 +535,8 @@ function configurePawForCup(cup) {
   const cupRect = cup.getBoundingClientRect();
   const pawRect = gamePaw.getBoundingClientRect();
   const desiredX = fromRight
-    ? cupRect.right - cupRect.width * 0.48
-    : cupRect.left + cupRect.width * 0.48;
+    ? cupRect.right - cupRect.width * 0.72
+    : cupRect.left + cupRect.width * 0.72;
   const currentX = fromRight ? pawRect.left : pawRect.right;
   const desiredY = cupRect.top + cupRect.height * 0.55;
   const currentY = pawRect.top + pawRect.height * 0.5;

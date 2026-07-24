@@ -908,3 +908,21 @@ body.standalone-game{
     transform:translateY(0);
   }
 }
+
+/* Tuxedo foreleg: visible dark sleeve ending in a white mitten paw. */
+.paw{
+  left:-345px;
+  background:var(--charcoal);
+  border-color:rgba(46,43,40,.58);
+}
+.paw:before{
+  right:-6px;
+  top:3px;
+  width:42px;
+  height:38px;
+  background:var(--warm-white);
+}
+.paw.from-right{
+  left:auto;
+  right:-345px;
+}
