@@ -22,7 +22,10 @@ async function waitForPhase(page, expected, timeout = 15000) {
 
 async function answerCorrectly(page) {
   const slot = await page.evaluate(() => window.__sixGame.getAnswerSlot());
-  await page.keyboard.press(String(slot + 1));
+  for (let tap = 0; tap < 3; tap += 1) {
+    await page.keyboard.press(String(slot + 1));
+    await page.waitForTimeout(120);
+  }
 }
 
 const viewports = [
@@ -52,7 +55,14 @@ for (const viewport of viewports) {
 
   if (viewport.journey === 'lose') {
     const answerSlot = await page.evaluate(() => window.__sixGame.getAnswerSlot());
-    await page.keyboard.press(String(((answerSlot + 1) % 3) + 1));
+    const wrongKey = String(((answerSlot + 1) % 3) + 1);
+    await page.keyboard.press(wrongKey);
+    await page.waitForTimeout(120);
+    await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-nudge-one.png` });
+    await page.keyboard.press(wrongKey);
+    await page.waitForTimeout(120);
+    await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-nudge-two.png` });
+    await page.keyboard.press(wrongKey);
     await waitForPhase(page, 'reveal');
     await page.waitForTimeout(180);
     await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-wrong-reveal.png` });
@@ -60,7 +70,7 @@ for (const viewport of viewports) {
     await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-failed.png` });
     await page.locator('#primaryGameAction').click();
     await waitForPhase(page, 'choose');
-    await waitForPhase(page, 'reveal', 7000);
+    await waitForPhase(page, 'reveal', 11000);
     await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-timeout-reveal.png` });
     await waitForPhase(page, 'failed');
     await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-timeout-result.png` });

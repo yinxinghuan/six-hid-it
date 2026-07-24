@@ -462,6 +462,40 @@
   }
 }
 
+/* The foreleg is anchored outside the frame and always passes behind the cups. */
+.paw{
+  z-index:7;
+  left:-420px;
+  width:400px;
+  height:44px;
+  border-radius:0 55% 52% 0;
+  clip-path:polygon(0 11%,87% 13%,100% 31%,99% 77%,87% 88%,0 94%);
+  box-shadow:none;
+}
+.paw:before{
+  right:-6px;
+  top:2px;
+  width:55px;
+  height:40px;
+}
+.paw.from-right{
+  left:auto;
+  right:-420px;
+}
+.paw.is-placing{
+  transform:translate(var(--paw-x),var(--paw-y)) scaleX(var(--paw-flip)) rotate(2deg);
+}
+.cup-row{z-index:8}
+.game-flower{
+  z-index:9;
+  top:407px;
+  width:78px;
+  height:78px;
+}
+@media(max-width:340px){
+  .game-flower{top:368px}
+}
+
 /* Standalone platform entry keeps the review page and the playable surface separate. */
 body.standalone-game{
   min-height:100dvh;
@@ -490,5 +524,253 @@ body.standalone-game{
 @media(max-height:620px){
   .standalone-game__stage{
     width:min(calc((100dvh - 16px) * .5625),100%);
+  }
+}
+
+/* Multi-tap, grounded cup interaction and physical reveal. */
+.game-cat{
+  transform-origin:50% 72%;
+  will-change:transform;
+}
+.cat-expression{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+.cat-pupil{
+  position:absolute;
+  z-index:2;
+  top:42.2%;
+  width:6px;
+  height:21px;
+  border-radius:50%;
+  background:var(--ink);
+  transform:translateX(var(--gaze-x,0)) scaleY(var(--pupil-scale,1));
+  transform-origin:center;
+  transition:transform 180ms cubic-bezier(.2,.8,.2,1),height 180ms ease;
+}
+.cat-pupil:after{
+  content:"";
+  position:absolute;
+  left:-1px;
+  top:1px;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:rgba(251,248,242,.9);
+}
+.cat-pupil-left{left:34.3%}
+.cat-pupil-right{left:63.5%}
+.cat-brow{
+  position:absolute;
+  z-index:3;
+  top:34.8%;
+  width:36px;
+  height:17px;
+  border-top:4px solid #8f8882;
+  border-radius:50%;
+  transform-origin:center;
+  transition:transform 180ms cubic-bezier(.2,.8,.2,1),top 180ms ease;
+}
+.cat-brow-left{left:23.5%;transform:rotate(8deg)}
+.cat-brow-right{right:23.5%;transform:rotate(-8deg)}
+.phone.gaze-left{--gaze-x:-5px;--cat-lean:-1.6deg}
+.phone.gaze-center{--gaze-x:0;--cat-lean:0deg}
+.phone.gaze-right{--gaze-x:5px;--cat-lean:1.6deg}
+.phone[data-effort="1"]{--pupil-scale:.92}
+.phone[data-effort="2"]{--pupil-scale:.78}
+.phone[data-effort="3"]{--pupil-scale:.62}
+.phone[data-effort="2"] .cat-brow-left,
+.phone[data-effort="3"] .cat-brow-left{top:36%;transform:rotate(16deg)}
+.phone[data-effort="2"] .cat-brow-right,
+.phone[data-effort="3"] .cat-brow-right{top:36%;transform:rotate(-16deg)}
+.phone.is-probing .game-cat{
+  animation:six-cat-track 300ms cubic-bezier(.2,.8,.2,1);
+}
+.phone.is-anticipating .game-cat{
+  animation:six-cat-anticipate 180ms cubic-bezier(.45,0,.8,.45) forwards;
+}
+.phone.is-contact .game-cat{
+  transform:translateY(5px) rotate(var(--cat-lean,0deg)) scaleY(.98);
+}
+
+.paw{
+  --paw-flip:1;
+  transform:scaleX(var(--paw-flip)) rotate(8deg);
+  transform-origin:center;
+  will-change:transform;
+}
+.paw.from-right{
+  left:auto;
+  right:-18px;
+  --paw-flip:-1;
+}
+.paw.is-measuring{
+  transition:none!important;
+  transform:scaleX(var(--paw-flip)) rotate(8deg)!important;
+}
+.paw.is-nudging{
+  animation:six-paw-nudge 300ms cubic-bezier(.2,.76,.2,1);
+}
+.paw.is-anticipating{
+  animation:six-paw-anticipate 180ms cubic-bezier(.45,0,.8,.45) forwards;
+}
+.paw.is-swinging{
+  animation:six-paw-swing 360ms cubic-bezier(.16,.84,.28,1) forwards;
+}
+.paw.is-following{
+  transform:translate(var(--paw-x),var(--paw-y)) scaleX(var(--paw-flip)) rotate(-2deg);
+}
+.paw.is-retracting{
+  animation:six-paw-retract 220ms cubic-bezier(.55,0,.8,.45);
+}
+
+.shell-cup{
+  transform-origin:50% 88%;
+}
+.phone[data-phase="choose"] .shell-cup:hover{
+  transform:translateX(var(--probe-x,0)) rotate(var(--probe-rot,0));
+}
+.shell-cup[data-nudge]{
+  transform:translateX(var(--probe-x,0)) rotate(var(--probe-rot,0));
+}
+.shell-cup[data-nudge]:after{display:none}
+.shell-cup.is-nudging .cup-body{
+  filter:brightness(1.06);
+}
+.shell-cup.is-picked{
+  transform:translateX(var(--probe-x,0)) rotate(var(--probe-rot,0));
+}
+.shell-cup.is-wrong{
+  filter:grayscale(.72) opacity(.72);
+  transform:translateX(var(--probe-x,0)) rotate(var(--probe-rot,0));
+}
+.shell-cup.is-braced{
+  transform:translateX(var(--probe-x,0)) rotate(var(--probe-rot,0)) scaleX(.985);
+}
+.shell-cup.is-contact{
+  transform:translateX(var(--probe-x,0)) rotate(var(--probe-rot,0)) scale(.96,1.018);
+  filter:brightness(1.12);
+}
+.shell-cup.is-answer.is-tumbling{
+  z-index:11;
+  animation:six-cup-tumble 700ms cubic-bezier(.22,.66,.18,1) forwards;
+}
+.shell-cup.is-answer.is-tumbling .cup-body{
+  background-image:url("./assets/titanium-cup-reveal.svg");
+}
+.shell-cup.is-bumped{
+  animation:six-cup-bumped 260ms cubic-bezier(.2,.75,.3,1);
+}
+.choice-timer.is-running i{
+  animation-duration:9s;
+}
+
+.impact-mark{
+  position:absolute;
+  z-index:13;
+  width:72px;
+  height:34px;
+  opacity:0;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+}
+.impact-mark:before{
+  content:"";
+  position:absolute;
+  left:8px;
+  right:8px;
+  bottom:2px;
+  height:16px;
+  border:1px solid var(--ice-dark);
+  border-radius:50%;
+  transform:scale(.35);
+}
+.impact-mark i{
+  position:absolute;
+  left:35px;
+  top:8px;
+  width:1px;
+  height:14px;
+  background:var(--charcoal);
+  transform-origin:center bottom;
+}
+.impact-mark i:first-child{transform:translate(-19px,-5px) rotate(-58deg)}
+.impact-mark i:nth-child(2){transform:translate(0,-12px)}
+.impact-mark i:nth-child(3){transform:translate(19px,-5px) rotate(58deg)}
+.impact-mark.is-visible{
+  animation:six-impact-mark 210ms ease-out forwards;
+}
+.phone.is-impact{
+  animation:six-phone-impact 180ms linear;
+}
+
+@keyframes six-cat-track{
+  0%,100%{transform:translateY(0) rotate(0)}
+  55%{transform:translateY(3px) rotate(var(--cat-lean,0deg))}
+}
+@keyframes six-cat-anticipate{
+  from{transform:translateY(0) rotate(var(--cat-lean,0deg)) scaleY(1)}
+  to{transform:translateY(6px) rotate(var(--cat-lean,0deg)) scaleY(.985)}
+}
+@keyframes six-paw-nudge{
+  0%,100%{transform:translate(0,0) scaleX(var(--paw-flip)) rotate(8deg)}
+  58%{transform:translate(var(--paw-pre-x),var(--paw-pre-y)) scaleX(var(--paw-flip)) rotate(3deg)}
+  78%{transform:translate(var(--paw-x),var(--paw-y)) scaleX(var(--paw-flip)) rotate(-2deg)}
+}
+@keyframes six-paw-anticipate{
+  from{transform:translate(0,0) scaleX(var(--paw-flip)) rotate(8deg)}
+  to{transform:translate(var(--paw-pre-x),var(--paw-pre-y)) scaleX(var(--paw-flip)) rotate(13deg)}
+}
+@keyframes six-paw-swing{
+  0%{transform:translate(var(--paw-pre-x),var(--paw-pre-y)) scaleX(var(--paw-flip)) rotate(13deg)}
+  82%{transform:translate(var(--paw-x),var(--paw-y)) scaleX(var(--paw-flip)) rotate(-4deg)}
+  100%{transform:translate(var(--paw-x),var(--paw-y)) scaleX(var(--paw-flip)) rotate(-2deg)}
+}
+@keyframes six-paw-retract{
+  from{transform:translate(var(--paw-x),var(--paw-y)) scaleX(var(--paw-flip)) rotate(-2deg)}
+  to{transform:translate(0,0) scaleX(var(--paw-flip)) rotate(8deg)}
+}
+@keyframes six-cup-tumble{
+  0%{transform:translateX(var(--probe-x)) rotate(var(--probe-rot));animation-timing-function:cubic-bezier(.15,.72,.2,1)}
+  12%{transform:translateX(var(--probe-x)) rotate(var(--probe-rot)) scale(.97,1.02)}
+  40%{transform:translate(var(--kick-x),var(--kick-y)) rotate(var(--kick-rot)) scale(1)}
+  64%{transform:translate(var(--land-x),0) rotate(var(--land-rot)) scale(1.025,.975);animation-timing-function:cubic-bezier(.22,.1,.35,1)}
+  76%{transform:translate(var(--land-x),-11px) rotate(var(--bounce-rot)) scale(1)}
+  89%{transform:translate(var(--land-x),-2px) rotate(var(--land-rot))}
+  100%{transform:translate(var(--land-x),0) rotate(var(--land-rot))}
+}
+@keyframes six-cup-bumped{
+  0%,100%{transform:translateX(0) rotate(0)}
+  28%{transform:translateX(var(--bump-x,7px)) rotate(var(--bump-rot,3deg))}
+  56%{transform:translateX(var(--bump-back-x,-4px)) rotate(var(--bump-back-rot,-1.2deg))}
+  78%{transform:translateX(var(--bump-settle-x,2px))}
+}
+@keyframes six-impact-mark{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.45)}
+  34%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)}
+}
+@keyframes six-phone-impact{
+  0%,100%{transform:translate(0,0)}
+  24%{transform:translate(2px,1px)}
+  52%{transform:translate(-1px,-1px)}
+  76%{transform:translate(1px,0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .phone.is-probing .game-cat,
+  .phone.is-anticipating .game-cat,
+  .paw.is-nudging,
+  .paw.is-anticipating,
+  .paw.is-swinging,
+  .paw.is-retracting,
+  .shell-cup.is-answer.is-tumbling,
+  .shell-cup.is-bumped,
+  .impact-mark.is-visible,
+  .phone.is-impact{
+    animation:none!important;
+  }
+  .shell-cup.is-answer.is-tumbling{
+    transform:translateX(var(--land-x)) rotate(var(--land-rot));
   }
 }

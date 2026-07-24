@@ -16,11 +16,18 @@
       <div class="phone" data-phase="idle">
         <div class="phone-top"><span id="roundLabel">ROUND 1 / 3</span><span class="flower-score" aria-label="0 of 3 ice flowers"><i></i><i></i><i></i></span></div>
         <div class="game-wall"><span class="window-light"></span><span class="frame-line"></span></div>
-        <div class="game-cat"><img src="./src/assets/little6-papercut.svg" alt="黑白剪纸造型的 Little 6 从桌后观察" /></div>
+        <div class="game-cat">
+          <img src="./src/assets/little6-papercut.svg" alt="黑白剪纸造型的 Little 6 从桌后观察" />
+          <span class="cat-expression" aria-hidden="true">
+            <i class="cat-brow cat-brow-left"></i><i class="cat-brow cat-brow-right"></i>
+            <i class="cat-pupil cat-pupil-left"></i><i class="cat-pupil cat-pupil-right"></i>
+          </span>
+        </div>
         <div class="game-status" aria-live="polite"><small>LITTLE 6 SAYS</small><strong id="gameStatus">FIND THE FLOWER</strong></div>
         <div class="table-surface"></div>
         <div class="paw paw-left" id="gamePaw" aria-hidden="true"><i></i></div>
         <div class="ice-flower game-flower" id="gameFlower" aria-hidden="true"><img src="./src/assets/ice-flower.svg" alt="" /></div>
+        <div class="impact-mark" id="impactMark" aria-hidden="true"><i></i><i></i><i></i></div>
         <div class="cup-row" aria-label="Choose one of three titanium cups">
           <button class="shell-cup cup-one" type="button" data-cup="0" aria-label="选择左边的杯子"><span class="cup-body"><i></i><b></b></span><span class="cup-shadow"></span></button>
           <button class="shell-cup cup-two" type="button" data-cup="1" aria-label="选择中间的杯子"><span class="cup-body"><i></i><b></b></span><span class="cup-shadow"></span></button>

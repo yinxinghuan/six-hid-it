@@ -6,7 +6,8 @@ const ROUND_CONFIG = [
   { swaps: 5, duration: 420 },
   { swaps: 7, duration: 340 },
 ];
-const CHOICE_TIME = 5000;
+const CHOICE_TIME = 9000;
+const NUDGES_TO_REVEAL = 3;
 
 const copy = {
   en: {
@@ -18,7 +19,13 @@ const copy = {
     cover: 'SIX HID IT',
     shuffle: 'WATCH SIX',
     choose: 'WHICH ONE?',
-    chooseHint: 'TAP A CUP · OR PRESS 1 2 3',
+    chooseHint: 'TAP THE SAME CUP 3 TIMES',
+    nudgeOne: 'SIX IS WATCHING',
+    nudgeOneHint: 'TAP AGAIN · OR TRY ANOTHER CUP',
+    nudgeTwo: 'ONE MORE PUSH',
+    nudgeTwoHint: 'TAP ONCE MORE TO REVEAL',
+    reveal: 'WATCH THE PAW',
+    revealHint: 'SIX IS OPENING IT',
     correct: 'YOU FOUND IT',
     correctHint: 'ICE FLOWER FOUND',
     wrong: 'SIX FOOLED YOU',
@@ -50,7 +57,13 @@ const copy = {
     cover: '小六藏好了',
     shuffle: '盯紧小六',
     choose: '在哪一只？',
-    chooseHint: '点击杯子 · 或按 1 2 3',
+    chooseHint: '连续轻拨同一只杯子 3 次',
+    nudgeOne: '小六在看这里',
+    nudgeOneHint: '再点一次 · 或换一只杯子',
+    nudgeTwo: '再用力一点',
+    nudgeTwoHint: '再点一次就会揭晓',
+    reveal: '看小六的爪子',
+    revealHint: '她要拨开杯子了',
     correct: '你找到了',
     correctHint: '获得一枚冰花',
     wrong: '被小六骗到了',
@@ -101,6 +114,7 @@ const cupRow = document.querySelector('.cup-row');
 const gameStatus = document.querySelector('#gameStatus');
 const gameFlower = document.querySelector('#gameFlower');
 const gamePaw = document.querySelector('#gamePaw');
+const impactMark = document.querySelector('#impactMark');
 const tapHint = document.querySelector('#tapHint');
 const resetButton = document.querySelector('#resetDemo');
 const phone = document.querySelector('.phone');
@@ -126,6 +140,9 @@ let slotsByCup = [0, 1, 2];
 let runToken = 0;
 let choiceTimeout = 0;
 let audioContext;
+let probeCupId = -1;
+let probeCount = 0;
+let nudgeLocked = false;
 
 function setPhase(nextPhase) {
   phase = nextPhase;
@@ -176,6 +193,20 @@ const sound = {
   },
   select() {
     tone(180, 0.07, 0.03, 'triangle');
+  },
+  nudge(level) {
+    tone(360 + level * 65, 0.07, 0.026, 'triangle');
+    tone(980 + level * 130, 0.045, 0.014, 'sine', 0.025);
+  },
+  contact() {
+    tone(420, 0.09, 0.045, 'triangle');
+    tone(780, 0.08, 0.035, 'sine', 0.012);
+  },
+  land() {
+    tone(1160, 0.14, 0.05, 'triangle');
+    tone(2180, 0.09, 0.026, 'sine', 0.018);
+    tone(1720, 0.06, 0.018, 'sine', 0.085);
+    tone(1320, 0.055, 0.012, 'sine', 0.145);
   },
   correct() {
     tone(880, 0.2, 0.045, 'sine');
@@ -244,11 +275,33 @@ function startChoiceTimer(token) {
 
 function resetCupPresentation() {
   cups.forEach((cup) => {
-    cup.classList.remove('is-picked', 'is-answer', 'is-wrong', 'is-preview');
+    cup.classList.remove(
+      'is-picked',
+      'is-answer',
+      'is-wrong',
+      'is-preview',
+      'is-nudging',
+      'is-braced',
+      'is-contact',
+      'is-tumbling',
+      'is-bumped',
+    );
+    cup.removeAttribute('data-nudge');
     cup.style.removeProperty('--shuffle-duration');
+    ['--probe-x', '--probe-rot', '--kick-x', '--kick-y', '--kick-rot', '--land-x', '--land-rot', '--bounce-rot', '--bump-x', '--bump-back-x', '--bump-settle-x', '--bump-rot', '--bump-back-rot']
+      .forEach((property) => cup.style.removeProperty(property));
   });
   gameFlower.classList.remove('is-visible');
-  gamePaw.classList.remove('is-placing', 'is-pointing');
+  gamePaw.classList.remove('is-placing', 'is-pointing', 'from-right', 'is-nudging', 'is-anticipating', 'is-swinging', 'is-following');
+  gamePaw.style.removeProperty('--paw-x');
+  gamePaw.style.removeProperty('--paw-y');
+  gamePaw.style.removeProperty('--paw-pre-x');
+  gamePaw.style.removeProperty('--paw-pre-y');
+  impactMark.classList.remove('is-visible');
+  phone.classList.remove('is-probing', 'is-anticipating', 'is-contact', 'is-impact', 'gaze-left', 'gaze-center', 'gaze-right');
+  probeCupId = -1;
+  probeCount = 0;
+  nudgeLocked = false;
   clearChoiceTimer();
 }
 
@@ -323,6 +376,7 @@ async function beginRound(token) {
   setPhase('place');
   gameStatus.textContent = t('place');
   tapHint.textContent = t('idleHint');
+  configurePawForCup(cups[flowerCupId]);
   gamePaw.classList.add('is-placing');
 
   if (!(await waitFor(roundIndex === 0 ? 800 : 450, token))) return;
@@ -370,22 +424,176 @@ function startGame() {
   beginRound(token);
 }
 
+function setCatGaze(slot, effort = 0) {
+  phone.classList.remove('gaze-left', 'gaze-center', 'gaze-right');
+  phone.classList.add(slot === 0 ? 'gaze-left' : slot === 2 ? 'gaze-right' : 'gaze-center');
+  phone.dataset.effort = String(effort);
+}
+
+function configurePawForCup(cup) {
+  const slot = slotsByCup[Number(cup.dataset.cup)];
+  const fromRight = slot === 2;
+  gamePaw.classList.remove('is-nudging', 'is-anticipating', 'is-swinging', 'is-following');
+  gamePaw.classList.toggle('from-right', fromRight);
+  gamePaw.classList.add('is-measuring');
+
+  const cupRect = cup.getBoundingClientRect();
+  const pawRect = gamePaw.getBoundingClientRect();
+  const desiredX = fromRight ? cupRect.right - 18 : cupRect.left + 18;
+  const currentX = fromRight ? pawRect.left + 16 : pawRect.right - 16;
+  const desiredY = cupRect.top + cupRect.height * 0.46;
+  const currentY = pawRect.top + pawRect.height * 0.5;
+  const x = desiredX - currentX;
+  const y = desiredY - currentY;
+
+  gamePaw.style.setProperty('--paw-x', `${x}px`);
+  gamePaw.style.setProperty('--paw-y', `${y}px`);
+  gamePaw.style.setProperty('--paw-pre-x', `${x * 0.72}px`);
+  gamePaw.style.setProperty('--paw-pre-y', `${y * 0.72 - 10}px`);
+  void gamePaw.offsetWidth;
+  gamePaw.classList.remove('is-measuring');
+}
+
+function setCupProbe(cup, level) {
+  const slot = slotsByCup[Number(cup.dataset.cup)];
+  const direction = slot === 2 ? -1 : 1;
+  cup.dataset.nudge = String(level);
+  cup.style.setProperty('--probe-x', `${direction * (level === 1 ? 5 : 11)}px`);
+  cup.style.setProperty('--probe-rot', `${direction * (level === 1 ? 2 : 4)}deg`);
+}
+
+async function nudgeCup(cup) {
+  if (phase !== 'choose' || nudgeLocked) return;
+  nudgeLocked = true;
+  ensureAudio();
+
+  const cupId = Number(cup.dataset.cup);
+  if (probeCupId !== cupId) {
+    cups.forEach((candidate) => {
+      if (candidate !== cup) {
+        candidate.removeAttribute('data-nudge');
+        candidate.classList.remove('is-nudging');
+        candidate.style.removeProperty('--probe-x');
+        candidate.style.removeProperty('--probe-rot');
+      }
+    });
+    probeCupId = cupId;
+    probeCount = 0;
+  }
+
+  probeCount += 1;
+  const visibleLevel = Math.min(probeCount, NUDGES_TO_REVEAL - 1);
+  const slot = slotsByCup[cupId];
+  setCatGaze(slot, visibleLevel);
+  configurePawForCup(cup);
+  setCupProbe(cup, visibleLevel);
+  cup.classList.add('is-nudging');
+  phone.classList.add('is-probing');
+  gamePaw.classList.add('is-nudging');
+  sound.nudge(visibleLevel);
+  navigator.vibrate?.(visibleLevel === 1 ? 7 : 11);
+
+  if (probeCount === 1) {
+    gameStatus.textContent = t('nudgeOne');
+    tapHint.textContent = t('nudgeOneHint');
+  } else {
+    gameStatus.textContent = t('nudgeTwo');
+    tapHint.textContent = t('nudgeTwoHint');
+  }
+
+  if (!(await waitFor(reducedMotion ? 90 : 300, runToken))) return;
+  cup.classList.remove('is-nudging');
+  gamePaw.classList.remove('is-nudging');
+  phone.classList.remove('is-probing');
+
+  if (probeCount >= NUDGES_TO_REVEAL) {
+    await revealChoice(cup);
+    return;
+  }
+  nudgeLocked = false;
+}
+
 async function revealChoice(selectedCup, timedOut = false) {
   if (phase !== 'choose') return;
   const token = runToken;
   setPhase('reveal');
   setCupsEnabled(false);
   clearChoiceTimer();
-  sound.select();
+  nudgeLocked = true;
+  gameStatus.textContent = t('reveal');
+  tapHint.textContent = t('revealHint');
 
   if (selectedCup) selectedCup.classList.add('is-picked');
   const answerCup = cups[flowerCupId];
   const isCorrect = selectedCup === answerCup;
   if (selectedCup && !isCorrect) selectedCup.classList.add('is-wrong');
-  answerCup.classList.add('is-answer');
+
+  const answerSlot = slotsByCup[flowerCupId];
+  const direction = answerSlot === 2 ? -1 : 1;
+  const adjacentSlot = answerSlot + direction;
+  const adjacentCupId = slotsByCup.indexOf(adjacentSlot);
+  const adjacentCup = adjacentCupId >= 0 ? cups[adjacentCupId] : null;
+  setCatGaze(answerSlot, 3);
+  configurePawForCup(answerCup);
+  answerCup.style.setProperty('--probe-x', `${direction * 11}px`);
+  answerCup.style.setProperty('--probe-rot', `${direction * 4}deg`);
+  answerCup.style.setProperty('--kick-x', `${direction * 42}px`);
+  answerCup.style.setProperty('--kick-y', '-44px');
+  answerCup.style.setProperty('--kick-rot', `${direction * 46}deg`);
+  answerCup.style.setProperty('--land-x', `${direction * 61}px`);
+  answerCup.style.setProperty('--land-rot', `${direction * 82}deg`);
+  answerCup.style.setProperty('--bounce-rot', `${direction * 69}deg`);
+  if (adjacentCup) {
+    adjacentCup.style.setProperty('--bump-x', `${direction * 8}px`);
+    adjacentCup.style.setProperty('--bump-back-x', `${direction * -4}px`);
+    adjacentCup.style.setProperty('--bump-settle-x', `${direction * 2}px`);
+    adjacentCup.style.setProperty('--bump-rot', `${direction * 3}deg`);
+    adjacentCup.style.setProperty('--bump-back-rot', `${direction * -1.2}deg`);
+  }
+
+  const phoneRect = phone.getBoundingClientRect();
+  const answerRect = answerCup.getBoundingClientRect();
+  impactMark.style.left = `${answerRect.left - phoneRect.left + answerRect.width / 2 + direction * 54}px`;
+  impactMark.style.top = `${answerRect.top - phoneRect.top + answerRect.height * 0.78}px`;
   positionFlower();
+
+  phone.classList.add('is-anticipating');
+  gamePaw.classList.add('is-anticipating');
+  answerCup.classList.add('is-braced');
+  sound.select();
+  if (!(await waitFor(reducedMotion ? 80 : 180, token))) return;
+
+  phone.classList.remove('is-anticipating');
+  gamePaw.classList.remove('is-anticipating');
+  gamePaw.classList.add('is-swinging');
+  if (!(await waitFor(reducedMotion ? 80 : 300, token))) return;
+
+  answerCup.classList.add('is-contact');
+  phone.classList.add('is-contact');
+  sound.contact();
+  navigator.vibrate?.(10);
+  if (!(await waitFor(reducedMotion ? 35 : 45, token))) return;
+
+  answerCup.classList.remove('is-braced', 'is-contact');
+  answerCup.classList.add('is-answer', 'is-tumbling');
+  gamePaw.classList.remove('is-swinging');
+  gamePaw.classList.add('is-following');
+  phone.classList.remove('is-contact');
+  if (!(await waitFor(reducedMotion ? 100 : 440, token))) return;
+
+  impactMark.classList.add('is-visible');
+  phone.classList.add('is-impact');
+  adjacentCup?.classList.add('is-bumped');
   gameFlower.classList.add('is-visible');
-  gamePaw.classList.add('is-pointing');
+  sound.land();
+  navigator.vibrate?.([18, 35, 8]);
+  if (!(await waitFor(reducedMotion ? 100 : 210, token))) return;
+  impactMark.classList.remove('is-visible');
+  phone.classList.remove('is-impact');
+  gamePaw.classList.remove('is-following');
+  gamePaw.classList.add('is-retracting');
+  if (!(await waitFor(reducedMotion ? 60 : 220, token))) return;
+  gamePaw.classList.remove('is-retracting');
 
   if (isCorrect) {
     flowersFound += 1;
@@ -394,7 +602,6 @@ async function revealChoice(selectedCup, timedOut = false) {
     tapHint.textContent = t('correctHint');
     phone.classList.add('is-correct');
     sound.correct();
-    navigator.vibrate?.(18);
   } else {
     gameStatus.textContent = timedOut ? t('timeout') : t('wrong');
     tapHint.textContent = timedOut ? t('timeoutHint') : t('wrongHint');
@@ -402,7 +609,7 @@ async function revealChoice(selectedCup, timedOut = false) {
     sound.wrong();
   }
 
-  if (!(await waitFor(isCorrect ? 1100 : 1400, token))) return;
+  if (!(await waitFor(isCorrect ? 650 : 900, token))) return;
   phone.classList.remove('is-correct', 'is-failed');
   if (isCorrect && roundIndex < 2) {
     roundIndex += 1;
@@ -423,17 +630,17 @@ function finishGame(won) {
 function chooseBySlot(slot) {
   if (phase !== 'choose') return;
   const cupId = slotsByCup.indexOf(slot);
-  if (cupId >= 0) revealChoice(cups[cupId]);
+  if (cupId >= 0) nudgeCup(cups[cupId]);
 }
 
 cups.forEach((cup) => {
   cup.addEventListener('pointerdown', (event) => {
     if (phase !== 'choose') return;
     event.preventDefault();
-    revealChoice(cup);
+    nudgeCup(cup);
   });
   cup.addEventListener('click', (event) => {
-    if (event.detail === 0 && phase === 'choose') revealChoice(cup);
+    if (event.detail === 0 && phase === 'choose') nudgeCup(cup);
   });
 });
 
