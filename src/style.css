@@ -1001,3 +1001,70 @@ body.standalone-game{
 @media(prefers-reduced-motion:reduce){
   .round-result{transition:none}
 }
+
+/* Larger host presence with continuous, phase-aware rise and fall. */
+.game-cat{
+  left:calc(50% - 180px);
+  top:12px;
+  width:360px;
+  height:321px;
+}
+.phone[data-phase="idle"] .game-cat{
+  animation:six-cat-idle-breathe 2.8s ease-in-out infinite;
+}
+.phone[data-phase="place"] .game-cat{
+  animation:none;
+  transform:translateY(38px);
+}
+.phone[data-phase="cover"] .game-cat{
+  animation:none;
+  transform:translateY(44px);
+}
+.phone[data-phase="shuffle"] .game-cat{
+  animation:six-cat-shuffle-watch 1.4s ease-in-out infinite;
+}
+.phone[data-phase="choose"]:not(.is-cat-emerging):not(.is-probing):not(.is-anticipating):not(.is-contact) .game-cat{
+  animation:six-cat-watch-bob 1.9s ease-in-out infinite;
+}
+@keyframes six-cat-idle-breathe{
+  0%,100%{transform:translateY(24px)}
+  50%{transform:translateY(33px)}
+}
+@keyframes six-cat-shuffle-watch{
+  0%,100%{transform:translateY(44px) rotate(-.35deg)}
+  50%{transform:translateY(30px) rotate(.35deg)}
+}
+@keyframes six-cat-watch-bob{
+  0%,100%{transform:translateY(2px)}
+  48%{transform:translateY(14px)}
+  72%{transform:translateY(-1px)}
+}
+@keyframes six-cat-emerge{
+  0%{transform:translateY(44px)}
+  66%{transform:translateY(-9px)}
+  84%{transform:translateY(3px)}
+  100%{transform:translateY(2px)}
+}
+@keyframes six-cat-peek-nudge{
+  0%,100%{transform:translateY(2px) rotate(0)}
+  46%{transform:translateY(-16px) rotate(var(--cat-lean,0deg))}
+  72%{transform:translateY(-8px) rotate(var(--cat-lean,0deg))}
+}
+@media(max-width:340px){
+  .game-cat{
+    left:calc(50% - 155px);
+    top:-2px;
+    width:310px;
+    height:277px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .phone[data-phase="idle"] .game-cat,
+  .phone[data-phase="shuffle"] .game-cat,
+  .phone[data-phase="choose"] .game-cat{
+    animation:none!important;
+  }
+  .phone[data-phase="idle"] .game-cat{transform:translateY(27px)}
+  .phone[data-phase="shuffle"] .game-cat{transform:translateY(39px)}
+  .phone[data-phase="choose"] .game-cat{transform:translateY(2px)}
+}
