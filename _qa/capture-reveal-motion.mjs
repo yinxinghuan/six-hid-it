@@ -22,20 +22,40 @@ const slot = await page.evaluate(() => window.__sixGame.getAnswerSlot());
 const key = String(slot + 1);
 
 await page.keyboard.press(key);
-await page.waitForTimeout(330);
-await page.locator('.phone').screenshot({ path: `${out}/01-grounded-nudge.png` });
+await page.waitForTimeout(240);
+await page.locator('.phone').screenshot({ path: `${out}/01-nudge-peak.png` });
+const nudgePeak = await page.evaluate(() => {
+  const paw = document.querySelector('#gamePaw');
+  const cup = document.querySelector('.shell-cup.is-nudging');
+  const pawStyle = getComputedStyle(paw);
+  const cupStyle = getComputedStyle(cup);
+  return {
+    pawRect: paw.getBoundingClientRect().toJSON(),
+    cupRect: cup.getBoundingClientRect().toJSON(),
+    pawX: pawStyle.getPropertyValue('--paw-x'),
+    pawY: pawStyle.getPropertyValue('--paw-y'),
+    pawTransform: pawStyle.transform,
+    cupTransform: cupStyle.transform,
+  };
+});
+await page.waitForTimeout(65);
+await page.locator('.phone').screenshot({ path: `${out}/02-nudge-rebound.png` });
+await page.waitForTimeout(145);
+await page.locator('.phone').screenshot({ path: `${out}/03-nudge-rest.png` });
 await page.keyboard.press(key);
-await page.waitForTimeout(330);
-await page.locator('.phone').screenshot({ path: `${out}/02-grounded-crooked.png` });
+await page.waitForTimeout(240);
+await page.locator('.phone').screenshot({ path: `${out}/04-strong-nudge-peak.png` });
+await page.waitForTimeout(210);
+await page.locator('.phone').screenshot({ path: `${out}/05-strong-nudge-rest.png` });
 await page.keyboard.press(key);
 
 for (const [name, delay] of [
-  ['03-anticipation', 120],
-  ['04-paw-contact', 330],
-  ['05-airborne', 180],
-  ['06-table-impact', 270],
-  ['07-paw-retract', 270],
-  ['08-settled-reveal', 420],
+  ['06-anticipation', 120],
+  ['07-paw-contact', 330],
+  ['08-airborne', 180],
+  ['09-table-impact', 270],
+  ['10-paw-retract', 270],
+  ['11-settled-reveal', 420],
 ]) {
   await page.waitForTimeout(delay);
   await page.locator('.phone').screenshot({ path: `${out}/${name}.png` });
@@ -47,5 +67,5 @@ const metrics = await page.evaluate(() => ({
   scrollWidth: document.documentElement.scrollWidth,
   clientWidth: document.documentElement.clientWidth,
 }));
-console.log(JSON.stringify({ errors, ...metrics }, null, 2));
+console.log(JSON.stringify({ errors, nudgePeak, ...metrics }, null, 2));
 await browser.close();

@@ -140,6 +140,8 @@ let slotsByCup = [0, 1, 2];
 let runToken = 0;
 let choiceTimeout = 0;
 let audioContext;
+let audioOutput;
+let metalNoiseBuffer;
 let probeCupId = -1;
 let probeCount = 0;
 let nudgeLocked = false;
@@ -161,7 +163,26 @@ async function waitFor(ms, token) {
 function ensureAudio() {
   if (!audioContext) {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (AudioContext) audioContext = new AudioContext();
+    if (AudioContext) {
+      audioContext = new AudioContext();
+      const compressor = audioContext.createDynamicsCompressor();
+      compressor.threshold.value = -18;
+      compressor.knee.value = 8;
+      compressor.ratio.value = 5;
+      compressor.attack.value = 0.003;
+      compressor.release.value = 0.18;
+      const masterGain = audioContext.createGain();
+      masterGain.gain.value = 0.72;
+      masterGain.connect(compressor).connect(audioContext.destination);
+      audioOutput = masterGain;
+
+      metalNoiseBuffer = audioContext.createBuffer(1, Math.ceil(audioContext.sampleRate * 0.12), audioContext.sampleRate);
+      const noise = metalNoiseBuffer.getChannelData(0);
+      for (let sample = 0; sample < noise.length; sample += 1) {
+        const envelope = 1 - sample / noise.length;
+        noise[sample] = (Math.random() * 2 - 1) * envelope;
+      }
+    }
   }
   if (audioContext?.state === 'suspended') audioContext.resume().catch(() => {});
 }
@@ -176,9 +197,48 @@ function tone(frequency, duration, volume, type = 'sine', delay = 0) {
   gain.gain.setValueAtTime(0.0001, start);
   gain.gain.exponentialRampToValueAtTime(Math.max(volume, 0.0002), start + 0.012);
   gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-  oscillator.connect(gain).connect(audioContext.destination);
+  oscillator.connect(gain).connect(audioOutput ?? audioContext.destination);
   oscillator.start(start);
   oscillator.stop(start + duration + 0.02);
+}
+
+function metalMode(frequency, decay, volume, delay = 0) {
+  if (!audioContext) return;
+  const start = audioContext.currentTime + delay;
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(frequency * 1.008, start);
+  oscillator.frequency.exponentialRampToValueAtTime(frequency, start + Math.min(0.028, decay * 0.3));
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(Math.max(volume, 0.0002), start + 0.002);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + decay);
+  oscillator.connect(gain).connect(audioOutput ?? audioContext.destination);
+  oscillator.start(start);
+  oscillator.stop(start + decay + 0.025);
+}
+
+function metalNoise(centerFrequency, duration, volume, delay = 0) {
+  if (!audioContext || !metalNoiseBuffer) return;
+  const start = audioContext.currentTime + delay;
+  const source = audioContext.createBufferSource();
+  const filter = audioContext.createBiquadFilter();
+  const gain = audioContext.createGain();
+  source.buffer = metalNoiseBuffer;
+  filter.type = 'bandpass';
+  filter.frequency.setValueAtTime(centerFrequency, start);
+  filter.Q.value = 1.15;
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(Math.max(volume, 0.0002), start + 0.001);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  source.connect(filter).connect(gain).connect(audioOutput ?? audioContext.destination);
+  source.start(start);
+  source.stop(start + duration + 0.01);
+}
+
+function metalStrike(modes, noiseFrequency, noiseDuration, noiseVolume, delay = 0) {
+  modes.forEach(([frequency, decay, volume]) => metalMode(frequency, decay, volume, delay));
+  metalNoise(noiseFrequency, noiseDuration, noiseVolume, delay);
 }
 
 const sound = {
@@ -189,24 +249,50 @@ const sound = {
     tone(110, 0.08, 0.025, 'triangle');
   },
   swap(step) {
-    tone(1650 + step * 90, 0.05, 0.018, 'sine');
+    const shift = step * 24;
+    metalStrike([
+      [1120 + shift, 0.11, 0.019],
+      [2860 + shift * 1.7, 0.072, 0.009],
+      [4380 + shift * 2.1, 0.046, 0.005],
+    ], 3900, 0.018, 0.012);
   },
   select() {
     tone(180, 0.07, 0.03, 'triangle');
   },
   nudge(level) {
-    tone(360 + level * 65, 0.07, 0.026, 'triangle');
-    tone(980 + level * 130, 0.045, 0.014, 'sine', 0.025);
+    const strength = level === 1 ? 1 : 1.28;
+    const contactDelay = reducedMotion ? 0 : 0.21;
+    metalStrike([
+      [980, 0.15 * strength, 0.026 * strength],
+      [2570, 0.105 * strength, 0.013 * strength],
+      [4280, 0.072 * strength, 0.007 * strength],
+      [6260, 0.048 * strength, 0.0035 * strength],
+    ], 4300, 0.022, 0.016 * strength, contactDelay);
   },
   contact() {
-    tone(420, 0.09, 0.045, 'triangle');
-    tone(780, 0.08, 0.035, 'sine', 0.012);
+    metalStrike([
+      [760, 0.26, 0.048],
+      [1860, 0.19, 0.026],
+      [3380, 0.13, 0.014],
+      [5740, 0.08, 0.006],
+    ], 3200, 0.022, 0.026);
   },
   land() {
-    tone(1160, 0.14, 0.05, 'triangle');
-    tone(2180, 0.09, 0.026, 'sine', 0.018);
-    tone(1720, 0.06, 0.018, 'sine', 0.085);
-    tone(1320, 0.055, 0.012, 'sine', 0.145);
+    metalStrike([
+      [620, 0.48, 0.058],
+      [1680, 0.36, 0.035],
+      [3150, 0.24, 0.018],
+      [5420, 0.16, 0.008],
+    ], 2400, 0.028, 0.035);
+    metalStrike([
+      [1760, 0.16, 0.014],
+      [3290, 0.12, 0.008],
+      [5580, 0.08, 0.0035],
+    ], 3600, 0.014, 0.01, 0.07);
+    metalStrike([
+      [1610, 0.12, 0.008],
+      [3010, 0.09, 0.0045],
+    ], 3100, 0.012, 0.006, 0.145);
   },
   correct() {
     tone(880, 0.2, 0.045, 'sine');
@@ -288,7 +374,7 @@ function resetCupPresentation() {
     );
     cup.removeAttribute('data-nudge');
     cup.style.removeProperty('--shuffle-duration');
-    ['--probe-x', '--probe-rot', '--kick-x', '--kick-y', '--kick-rot', '--land-x', '--land-rot', '--bounce-rot', '--bump-x', '--bump-back-x', '--bump-settle-x', '--bump-rot', '--bump-back-rot']
+    ['--probe-x', '--probe-rot', '--wobble-x', '--wobble-rot', '--wobble-back-x', '--wobble-back-rot', '--wobble-settle-x', '--wobble-settle-rot', '--kick-x', '--kick-y', '--kick-rot', '--land-x', '--land-rot', '--bounce-rot', '--bump-x', '--bump-back-x', '--bump-settle-x', '--bump-rot', '--bump-back-rot']
       .forEach((property) => cup.style.removeProperty(property));
   });
   gameFlower.classList.remove('is-visible');
@@ -439,9 +525,11 @@ function configurePawForCup(cup) {
 
   const cupRect = cup.getBoundingClientRect();
   const pawRect = gamePaw.getBoundingClientRect();
-  const desiredX = fromRight ? cupRect.right - 18 : cupRect.left + 18;
-  const currentX = fromRight ? pawRect.left + 16 : pawRect.right - 16;
-  const desiredY = cupRect.top + cupRect.height * 0.46;
+  const desiredX = fromRight
+    ? cupRect.right - cupRect.width * 0.48
+    : cupRect.left + cupRect.width * 0.48;
+  const currentX = fromRight ? pawRect.left : pawRect.right;
+  const desiredY = cupRect.top + cupRect.height * 0.55;
   const currentY = pawRect.top + pawRect.height * 0.5;
   const x = desiredX - currentX;
   const y = desiredY - currentY;
@@ -457,9 +545,21 @@ function configurePawForCup(cup) {
 function setCupProbe(cup, level) {
   const slot = slotsByCup[Number(cup.dataset.cup)];
   const direction = slot === 2 ? -1 : 1;
+  const forwardX = level === 1 ? 5 : 9;
+  const forwardRotation = level === 1 ? 2 : 4;
+  const reboundX = level === 1 ? -2 : -3.5;
+  const reboundRotation = level === 1 ? -0.9 : -1.6;
+  const settleX = level === 1 ? 0.7 : 1.2;
+  const settleRotation = level === 1 ? 0.35 : 0.6;
   cup.dataset.nudge = String(level);
-  cup.style.setProperty('--probe-x', `${direction * (level === 1 ? 5 : 11)}px`);
-  cup.style.setProperty('--probe-rot', `${direction * (level === 1 ? 2 : 4)}deg`);
+  cup.style.setProperty('--probe-x', '0px');
+  cup.style.setProperty('--probe-rot', '0deg');
+  cup.style.setProperty('--wobble-x', `${direction * forwardX}px`);
+  cup.style.setProperty('--wobble-rot', `${direction * forwardRotation}deg`);
+  cup.style.setProperty('--wobble-back-x', `${direction * reboundX}px`);
+  cup.style.setProperty('--wobble-back-rot', `${direction * reboundRotation}deg`);
+  cup.style.setProperty('--wobble-settle-x', `${direction * settleX}px`);
+  cup.style.setProperty('--wobble-settle-rot', `${direction * settleRotation}deg`);
 }
 
 async function nudgeCup(cup) {
@@ -475,6 +575,12 @@ async function nudgeCup(cup) {
         candidate.classList.remove('is-nudging');
         candidate.style.removeProperty('--probe-x');
         candidate.style.removeProperty('--probe-rot');
+        candidate.style.removeProperty('--wobble-x');
+        candidate.style.removeProperty('--wobble-rot');
+        candidate.style.removeProperty('--wobble-back-x');
+        candidate.style.removeProperty('--wobble-back-rot');
+        candidate.style.removeProperty('--wobble-settle-x');
+        candidate.style.removeProperty('--wobble-settle-rot');
       }
     });
     probeCupId = cupId;
@@ -491,7 +597,11 @@ async function nudgeCup(cup) {
   phone.classList.add('is-probing');
   gamePaw.classList.add('is-nudging');
   sound.nudge(visibleLevel);
-  navigator.vibrate?.(visibleLevel === 1 ? 7 : 11);
+  window.setTimeout(() => {
+    if (phase === 'choose' && cup.classList.contains('is-nudging')) {
+      navigator.vibrate?.(visibleLevel === 1 ? 7 : 11);
+    }
+  }, reducedMotion ? 0 : 210);
 
   if (probeCount === 1) {
     gameStatus.textContent = t('nudgeOne');
@@ -501,7 +611,7 @@ async function nudgeCup(cup) {
     tapHint.textContent = t('nudgeTwoHint');
   }
 
-  if (!(await waitFor(reducedMotion ? 90 : 300, runToken))) return;
+  if (!(await waitFor(reducedMotion ? 90 : 420, runToken))) return;
   cup.classList.remove('is-nudging');
   gamePaw.classList.remove('is-nudging');
   phone.classList.remove('is-probing');
@@ -535,8 +645,8 @@ async function revealChoice(selectedCup, timedOut = false) {
   const adjacentCup = adjacentCupId >= 0 ? cups[adjacentCupId] : null;
   setCatGaze(answerSlot, 3);
   configurePawForCup(answerCup);
-  answerCup.style.setProperty('--probe-x', `${direction * 11}px`);
-  answerCup.style.setProperty('--probe-rot', `${direction * 4}deg`);
+  answerCup.style.setProperty('--probe-x', '0px');
+  answerCup.style.setProperty('--probe-rot', '0deg');
   answerCup.style.setProperty('--kick-x', `${direction * 42}px`);
   answerCup.style.setProperty('--kick-y', '-44px');
   answerCup.style.setProperty('--kick-rot', `${direction * 46}deg`);

@@ -774,3 +774,69 @@ body.standalone-game{
     transform:translateX(var(--land-x)) rotate(var(--land-rot));
   }
 }
+
+/* Physical nudge refinement: the cat waits behind the table and every tap
+   produces a complete impulse → rebound → damped return cycle. */
+.game-cat{
+  left:calc(50% - 138px);
+  top:50px;
+  width:276px;
+  height:246px;
+}
+.paw{
+  left:-385px;
+  width:400px;
+  background:var(--warm-white);
+  border:1px solid rgba(46,43,40,.42);
+}
+.paw.from-right{
+  left:auto;
+  right:-385px;
+}
+.paw.is-nudging{
+  animation-duration:420ms;
+}
+.shell-cup{
+  transform-origin:50% 88%;
+}
+.phone[data-phase="choose"] .shell-cup:hover,
+.shell-cup[data-nudge],
+.shell-cup.is-picked,
+.shell-cup.is-wrong{
+  transform:translateX(0) rotate(0);
+}
+.shell-cup.is-braced{
+  transform:translateX(0) rotate(0) scaleX(.985);
+}
+.shell-cup.is-contact{
+  transform:translateX(0) rotate(0) scale(.96,1.018);
+}
+.shell-cup.is-nudging{
+  animation:six-cup-damped-wobble 420ms linear;
+}
+@keyframes six-cup-damped-wobble{
+  0%,48%{transform:translateX(0) rotate(0)}
+  58%{transform:translateX(var(--wobble-x)) rotate(var(--wobble-rot));animation-timing-function:cubic-bezier(.18,.76,.25,1)}
+  73%{transform:translateX(var(--wobble-back-x)) rotate(var(--wobble-back-rot));animation-timing-function:cubic-bezier(.2,.7,.3,1)}
+  87%{transform:translateX(var(--wobble-settle-x)) rotate(var(--wobble-settle-rot));animation-timing-function:ease-out}
+  100%{transform:translateX(0) rotate(0)}
+}
+@keyframes six-paw-nudge{
+  0%,100%{transform:translate(0,0) scaleX(var(--paw-flip)) rotate(8deg)}
+  36%{transform:translate(var(--paw-pre-x),var(--paw-pre-y)) scaleX(var(--paw-flip)) rotate(3deg)}
+  52%,58%{transform:translate(var(--paw-x),var(--paw-y)) scaleX(var(--paw-flip)) rotate(-2deg)}
+}
+@media(max-width:340px){
+  .game-cat{
+    left:calc(50% - 119px);
+    top:32px;
+    width:238px;
+    height:213px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .shell-cup.is-nudging{
+    animation:none!important;
+    transform:translateX(0) rotate(0)!important;
+  }
+}
