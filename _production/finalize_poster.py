@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageEnhance, ImageFont, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "_production" / "poster-source-v3.webp"
+SOURCE = ROOT / "_production" / "poster-source-v6.webp"
 OUTPUT = ROOT / "public" / "poster.png"
 THUMB = ROOT / "_production" / "poster-thumb-160.png"
 FONT = Path("/Library/Fonts/AGaramondPro-Bold.otf")
@@ -29,7 +29,15 @@ def draw_tracked(
         x += draw.textlength(char, font=font) + tracking
 
 
-image = Image.open(SOURCE).convert("RGBA").resize((1024, 1024), Image.Resampling.LANCZOS)
+source = Image.open(SOURCE).convert("RGB").resize((1024, 1024), Image.Resampling.LANCZOS)
+engraving = ImageOps.grayscale(source)
+engraving = ImageOps.autocontrast(engraving, cutoff=1)
+engraving = ImageEnhance.Contrast(engraving).enhance(1.24)
+image = ImageOps.colorize(
+    engraving,
+    black=(35, 32, 28),
+    white=(247, 243, 235),
+).convert("RGBA")
 overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
 draw = ImageDraw.Draw(overlay)
 

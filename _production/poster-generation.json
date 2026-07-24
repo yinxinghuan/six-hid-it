@@ -3,11 +3,11 @@
   "endpoint": "https://chat.aiwaves.tech/aigram/api/gen-image",
   "origin": "https://aigram.app",
   "generated_at": "2026-07-24",
-  "reference_url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1784898755463273.webp",
-  "source_url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1784904587793930.webp",
-  "source_file": "_production/poster-source-v3.webp",
+  "reference_url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1784905184998728.webp",
+  "source_url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1784905248964399.webp",
+  "source_file": "_production/poster-source-v6.webp",
   "final_file": "public/poster.png",
-  "finalization": "Raster title typesetting with Pillow over Aigram-generated copperplate narrative key art; not derived from SVG, Canvas, CSS, or a game screenshot.",
+  "finalization": "One-ink raster separation (deep charcoal ink plus warm ivory paper) and raster title typesetting with Pillow over Aigram-generated copperplate narrative key art; not derived from SVG, Canvas, CSS, or a game screenshot.",
   "rejected_sources": [
     {
       "file": "_production/poster-source.webp",
@@ -16,6 +16,22 @@
     {
       "file": "_production/poster-source-v2.webp",
       "reason": "Product composition passed, but the cat was a glossy digital illustration with a blue sticker outline instead of the website copperplate engraving identity."
+    },
+    {
+      "file": "_production/poster-source-v4.webp",
+      "reason": "The generation ignored the one-color instruction and introduced saturated magenta, green, blue, and yellow background blocks."
+    },
+    {
+      "file": "_production/poster-source-v5.webp",
+      "reason": "The one-color copperplate style passed, but all three espresso cups incorrectly had mug handles."
+    },
+    {
+      "file": "_production/poster-source-v7.webp",
+      "reason": "The vertical cup pose passed, but the edit retained all three forbidden handles."
+    },
+    {
+      "file": "_production/poster-source-v8.webp",
+      "reason": "The cups remained handleless but the requested upright orientation did not change; v6 was retained as the cleaner physical aftermath composition."
     }
   ]
 }
