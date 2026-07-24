@@ -4,7 +4,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "_production" / "poster-source-v2.webp"
+SOURCE = ROOT / "_production" / "poster-source-v3.webp"
 OUTPUT = ROOT / "public" / "poster.png"
 THUMB = ROOT / "_production" / "poster-thumb-160.png"
 FONT = Path("/Library/Fonts/AGaramondPro-Bold.otf")

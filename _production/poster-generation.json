@@ -3,15 +3,19 @@
   "endpoint": "https://chat.aiwaves.tech/aigram/api/gen-image",
   "origin": "https://aigram.app",
   "generated_at": "2026-07-24",
-  "reference_url": "https://images.aiwaves.tech/uploads/1784898708716-u4xtn6giscf.jpg",
-  "source_url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1784898755463273.webp",
-  "source_file": "_production/poster-source-v2.webp",
+  "reference_url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1784898755463273.webp",
+  "source_url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1784904587793930.webp",
+  "source_file": "_production/poster-source-v3.webp",
   "final_file": "public/poster.png",
-  "finalization": "Raster title typesetting with Pillow over Aigram-generated narrative key art; not derived from SVG, Canvas, CSS, or a game screenshot.",
+  "finalization": "Raster title typesetting with Pillow over Aigram-generated copperplate narrative key art; not derived from SVG, Canvas, CSS, or a game screenshot.",
   "rejected_sources": [
     {
       "file": "_production/poster-source.webp",
       "reason": "Incorrect handled coffee cups, saucers, costume, and inaccurate product identity."
+    },
+    {
+      "file": "_production/poster-source-v2.webp",
+      "reason": "Product composition passed, but the cat was a glossy digital illustration with a blue sticker outline instead of the website copperplate engraving identity."
     }
   ]
 }
