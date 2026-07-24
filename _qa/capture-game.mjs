@@ -22,10 +22,9 @@ async function waitForPhase(page, expected, timeout = 15000) {
 
 async function answerCorrectly(page) {
   const slot = await page.evaluate(() => window.__sixGame.getAnswerSlot());
-  for (let tap = 0; tap < 3; tap += 1) {
-    await page.keyboard.press(String(slot + 1));
-    await page.waitForTimeout(120);
-  }
+  await page.keyboard.press(String(slot + 1));
+  await page.waitForTimeout(500);
+  await page.keyboard.press(String(slot + 1));
 }
 
 const viewports = [
@@ -38,7 +37,7 @@ for (const viewport of viewports) {
   const page = await browser.newPage({
     viewport: { width: viewport.width, height: viewport.height },
     deviceScaleFactor: 1,
-    reducedMotion: 'reduce',
+    reducedMotion: 'no-preference',
     locale: viewport.name === 'game-mobile' ? 'zh-CN' : 'en-US',
   });
   const errors = [];
@@ -57,15 +56,14 @@ for (const viewport of viewports) {
     const answerSlot = await page.evaluate(() => window.__sixGame.getAnswerSlot());
     const wrongKey = String(((answerSlot + 1) % 3) + 1);
     await page.keyboard.press(wrongKey);
-    await page.waitForTimeout(120);
+    await page.waitForTimeout(500);
     await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-nudge-one.png` });
-    await page.keyboard.press(wrongKey);
-    await page.waitForTimeout(120);
-    await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-nudge-two.png` });
     await page.keyboard.press(wrongKey);
     await waitForPhase(page, 'reveal');
     await page.waitForTimeout(180);
     await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-wrong-reveal.png` });
+    await page.waitForTimeout(820);
+    await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-wrong-round-result.png` });
     await waitForPhase(page, 'failed');
     await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-failed.png` });
     await page.locator('#primaryGameAction').click();
@@ -79,6 +77,8 @@ for (const viewport of viewports) {
     await waitForPhase(page, 'reveal');
     await page.waitForTimeout(180);
     await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-correct-reveal.png` });
+    await page.waitForTimeout(820);
+    await page.locator('.phone').screenshot({ path: `${out}/${viewport.name}-correct-round-result.png` });
     if (viewport.journey === 'win') {
       for (let round = 1; round < 3; round += 1) {
         await waitForPhase(page, 'choose');

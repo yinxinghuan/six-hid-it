@@ -7,7 +7,6 @@ const ROUND_CONFIG = [
   { swaps: 7, duration: 340 },
 ];
 const CHOICE_TIME = 9000;
-const NUDGES_TO_REVEAL = 3;
 
 const copy = {
   en: {
@@ -19,19 +18,23 @@ const copy = {
     cover: 'SIX HID IT',
     shuffle: 'WATCH SIX',
     choose: 'WHICH ONE?',
-    chooseHint: 'TAP THE SAME CUP 3 TIMES',
-    nudgeOne: 'SIX IS WATCHING',
-    nudgeOneHint: 'TAP AGAIN · OR TRY ANOTHER CUP',
-    nudgeTwo: 'ONE MORE PUSH',
-    nudgeTwoHint: 'TAP ONCE MORE TO REVEAL',
+    chooseHint: 'TAP A CUP TO TEST IT',
+    nudgeOne: 'THIS ONE?',
+    nudgeOneHint: 'TAP IT AGAIN TO CONFIRM · OR SWITCH',
+    confirmLabel: 'TAP AGAIN',
     reveal: 'WATCH THE PAW',
     revealHint: 'SIX IS OPENING IT',
     correct: 'YOU FOUND IT',
     correctHint: 'ICE FLOWER FOUND',
+    correctResult: 'FOUND IT!',
+    correctResultDetail: 'ROUND +1 ICE FLOWER',
     wrong: 'SIX FOOLED YOU',
     wrongHint: 'THE FLOWER WAS HERE',
+    wrongResult: 'NOT THIS ONE',
+    wrongResultDetail: 'THE FLOWER WAS UNDER THIS CUP',
     timeout: 'TIME',
     timeoutHint: 'THE FLOWER WAS HERE',
+    timeoutResult: 'TIME IS UP',
     startKicker: 'LITTLE 6 PRESENTS',
     startTitle: 'Find the ice flower.',
     startBody: 'Watch which titanium cup covers it, then follow every move.',
@@ -57,19 +60,23 @@ const copy = {
     cover: '小六藏好了',
     shuffle: '盯紧小六',
     choose: '在哪一只？',
-    chooseHint: '连续轻拨同一只杯子 3 次',
-    nudgeOne: '小六在看这里',
-    nudgeOneHint: '再点一次 · 或换一只杯子',
-    nudgeTwo: '再用力一点',
-    nudgeTwoHint: '再点一次就会揭晓',
+    chooseHint: '点一只杯子试探',
+    nudgeOne: '就选这只？',
+    nudgeOneHint: '再点同一只确认 · 点别的更换',
+    confirmLabel: '再点确认',
     reveal: '看小六的爪子',
     revealHint: '她要拨开杯子了',
     correct: '你找到了',
     correctHint: '获得一枚冰花',
+    correctResult: '找到了！',
+    correctResultDetail: '本轮 +1 枚冰花',
     wrong: '被小六骗到了',
     wrongHint: '冰花在这里',
+    wrongResult: '猜错了',
+    wrongResultDetail: '冰花在这只杯子下',
     timeout: '时间到',
     timeoutHint: '冰花在这里',
+    timeoutResult: '时间到',
     startKicker: 'LITTLE 6 PRESENTS',
     startTitle: '找到冰花。',
     startBody: '看清哪只钛杯盖住它，然后跟住每一次换位。',
@@ -112,6 +119,9 @@ document.querySelectorAll('a[href^="#"]').forEach((link) => {
 const cups = [...document.querySelectorAll('.shell-cup')];
 const cupRow = document.querySelector('.cup-row');
 const gameStatus = document.querySelector('#gameStatus');
+const roundResult = document.querySelector('#roundResult');
+const roundResultTitle = document.querySelector('#roundResultTitle');
+const roundResultDetail = document.querySelector('#roundResultDetail');
 const gameFlower = document.querySelector('#gameFlower');
 const gamePaw = document.querySelector('#gamePaw');
 const impactMark = document.querySelector('#impactMark');
@@ -380,8 +390,10 @@ function resetCupPresentation() {
       'is-contact',
       'is-tumbling',
       'is-bumped',
+      'is-candidate',
     );
     cup.removeAttribute('data-nudge');
+    cup.removeAttribute('data-confirm-label');
     cup.style.removeProperty('--shuffle-duration');
     ['--probe-x', '--probe-rot', '--wobble-x', '--wobble-rot', '--wobble-back-x', '--wobble-back-rot', '--wobble-settle-x', '--wobble-settle-rot', '--kick-x', '--kick-y', '--kick-rot', '--land-x', '--land-rot', '--bounce-rot', '--bump-x', '--bump-back-x', '--bump-settle-x', '--bump-rot', '--bump-back-rot']
       .forEach((property) => cup.style.removeProperty(property));
@@ -393,7 +405,11 @@ function resetCupPresentation() {
   gamePaw.style.removeProperty('--paw-pre-x');
   gamePaw.style.removeProperty('--paw-pre-y');
   impactMark.classList.remove('is-visible');
-  phone.classList.remove('is-probing', 'is-anticipating', 'is-contact', 'is-impact', 'gaze-left', 'gaze-center', 'gaze-right');
+  roundResult.classList.remove('is-visible', 'is-correct', 'is-wrong');
+  roundResult.setAttribute('aria-hidden', 'true');
+  roundResultTitle.textContent = '';
+  roundResultDetail.textContent = '';
+  phone.classList.remove('is-probing', 'is-anticipating', 'is-contact', 'is-impact', 'is-correct', 'is-failed', 'gaze-left', 'gaze-center', 'gaze-right');
   probeCupId = -1;
   probeCount = 0;
   nudgeLocked = false;
@@ -554,10 +570,10 @@ function configurePawForCup(cup) {
 function setCupProbe(cup, level) {
   const slot = slotsByCup[Number(cup.dataset.cup)];
   const direction = slot === 2 ? -1 : 1;
-  const forwardX = level === 1 ? 5 : 9;
-  const forwardRotation = level === 1 ? 2 : 4;
-  const reboundX = level === 1 ? -2 : -3.5;
-  const reboundRotation = level === 1 ? -0.9 : -1.6;
+  const forwardX = level === 1 ? 7 : 9;
+  const forwardRotation = level === 1 ? 3 : 4;
+  const reboundX = level === 1 ? -3 : -3.5;
+  const reboundRotation = level === 1 ? -1.2 : -1.6;
   const settleX = level === 1 ? 0.7 : 1.2;
   const settleRotation = level === 1 ? 0.35 : 0.6;
   cup.dataset.nudge = String(level);
@@ -571,6 +587,30 @@ function setCupProbe(cup, level) {
   cup.style.setProperty('--wobble-settle-rot', `${direction * settleRotation}deg`);
 }
 
+function showRoundResult(isCorrect, timedOut) {
+  const titleKey = isCorrect ? 'correctResult' : timedOut ? 'timeoutResult' : 'wrongResult';
+  const detailKey = isCorrect ? 'correctResultDetail' : 'wrongResultDetail';
+  roundResultTitle.textContent = t(titleKey);
+  roundResultDetail.textContent = t(detailKey);
+  roundResult.classList.remove('is-correct', 'is-wrong');
+  roundResult.classList.add('is-visible', isCorrect ? 'is-correct' : 'is-wrong');
+  roundResult.setAttribute('aria-hidden', 'false');
+
+  if (isCorrect) {
+    flowersFound += 1;
+    updateHud();
+    gameStatus.textContent = t('correct');
+    tapHint.textContent = t('correctHint');
+    phone.classList.add('is-correct');
+    sound.correct();
+  } else {
+    gameStatus.textContent = timedOut ? t('timeout') : t('wrong');
+    tapHint.textContent = timedOut ? t('timeoutHint') : t('wrongHint');
+    phone.classList.add('is-failed');
+    sound.wrong();
+  }
+}
+
 async function nudgeCup(cup) {
   if (phase !== 'choose' || nudgeLocked) return;
   nudgeLocked = true;
@@ -581,6 +621,8 @@ async function nudgeCup(cup) {
     cups.forEach((candidate) => {
       if (candidate !== cup) {
         candidate.removeAttribute('data-nudge');
+        candidate.removeAttribute('data-confirm-label');
+        candidate.classList.remove('is-candidate');
         candidate.classList.remove('is-nudging');
         candidate.style.removeProperty('--probe-x');
         candidate.style.removeProperty('--probe-rot');
@@ -597,7 +639,14 @@ async function nudgeCup(cup) {
   }
 
   probeCount += 1;
-  const visibleLevel = Math.min(probeCount, NUDGES_TO_REVEAL - 1);
+  if (probeCount >= 2) {
+    cup.removeAttribute('data-confirm-label');
+    cup.classList.remove('is-candidate');
+    await revealChoice(cup);
+    return;
+  }
+
+  const visibleLevel = 1;
   const slot = slotsByCup[cupId];
   setCatGaze(slot, visibleLevel);
   configurePawForCup(cup);
@@ -612,23 +661,15 @@ async function nudgeCup(cup) {
     }
   }, reducedMotion ? 0 : 210);
 
-  if (probeCount === 1) {
-    gameStatus.textContent = t('nudgeOne');
-    tapHint.textContent = t('nudgeOneHint');
-  } else {
-    gameStatus.textContent = t('nudgeTwo');
-    tapHint.textContent = t('nudgeTwoHint');
-  }
+  gameStatus.textContent = t('nudgeOne');
+  tapHint.textContent = t('nudgeOneHint');
 
   if (!(await waitFor(reducedMotion ? 90 : 420, runToken))) return;
   cup.classList.remove('is-nudging');
   gamePaw.classList.remove('is-nudging');
   phone.classList.remove('is-probing');
-
-  if (probeCount >= NUDGES_TO_REVEAL) {
-    await revealChoice(cup);
-    return;
-  }
+  cup.classList.add('is-candidate');
+  cup.dataset.confirmLabel = t('confirmLabel');
   nudgeLocked = false;
 }
 
@@ -643,6 +684,10 @@ async function revealChoice(selectedCup, timedOut = false) {
   tapHint.textContent = t('revealHint');
 
   if (selectedCup) selectedCup.classList.add('is-picked');
+  cups.forEach((cup) => {
+    cup.removeAttribute('data-confirm-label');
+    cup.classList.remove('is-candidate');
+  });
   const answerCup = cups[flowerCupId];
   const isCorrect = selectedCup === answerCup;
   if (selectedCup && !isCorrect) selectedCup.classList.add('is-wrong');
@@ -706,6 +751,7 @@ async function revealChoice(selectedCup, timedOut = false) {
   gameFlower.classList.add('is-visible');
   sound.land();
   navigator.vibrate?.([18, 35, 8]);
+  showRoundResult(isCorrect, timedOut);
   if (!(await waitFor(reducedMotion ? 100 : 210, token))) return;
   impactMark.classList.remove('is-visible');
   phone.classList.remove('is-impact');
@@ -714,21 +760,7 @@ async function revealChoice(selectedCup, timedOut = false) {
   if (!(await waitFor(reducedMotion ? 60 : 220, token))) return;
   gamePaw.classList.remove('is-retracting');
 
-  if (isCorrect) {
-    flowersFound += 1;
-    updateHud();
-    gameStatus.textContent = t('correct');
-    tapHint.textContent = t('correctHint');
-    phone.classList.add('is-correct');
-    sound.correct();
-  } else {
-    gameStatus.textContent = timedOut ? t('timeout') : t('wrong');
-    tapHint.textContent = timedOut ? t('timeoutHint') : t('wrongHint');
-    phone.classList.add('is-failed');
-    sound.wrong();
-  }
-
-  if (!(await waitFor(isCorrect ? 650 : 900, token))) return;
+  if (!(await waitFor(isCorrect ? 900 : 1100, token))) return;
   phone.classList.remove('is-correct', 'is-failed');
   if (isCorrect && roundIndex < 2) {
     roundIndex += 1;
