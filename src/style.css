@@ -519,7 +519,12 @@ body.standalone-game{
   width:100%;
   max-height:none;
   margin:0;
-  box-shadow:12px 14px 0 #d2c9bc;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+}
+.standalone-game .phone:after{
+  display:none;
 }
 @media(max-height:620px){
   .standalone-game__stage{
