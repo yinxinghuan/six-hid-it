@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta name="game-uuid" content="f114b765-6d1e-4db6-98e1-76ee16ca10f6" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f0e8" />
+    <title>Little 6 — SIX HID IT 评审</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@500;600;700&family=Noto+Sans+SC:wght@500;600;700&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://images.aiwaves.tech/alteru/guest-shell.js" defer></script>
+  </head>
+  <body>
+    <main class="review-shell">
+      <header class="site-header">
+        <a class="brand" href="#top">LITTLE <i>6</i></a>
+        <p>CHARACTER + GAME REVIEW / 03</p>
+        <a href="https://little6.co/pages/about-6-story" target="_blank" rel="noreferrer">品牌故事 <span>↗</span></a>
+      </header>
+
+      <section class="hero" id="top">
+        <div class="hero-cat"><img src="./images/little6-avatar.png" alt="Little 6 official engraved cat portrait" /></div>
+        <div class="hero-copy">
+          <p class="eyebrow">NAMED AFTER A CAT · INSPIRED BY EVERYDAY JOY</p>
+          <h1>SIX<br /><em>HID IT</em></h1>
+          <p>Little 6 用白爪把一枚冰花藏在三只钛杯之间。跟紧她的眼睛，找到正确的那一只。</p>
+          <a class="primary-button" href="#slice">查看游戏切片 <span>↓</span></a>
+        </div>
+        <div class="hero-object">
+          <img src="./images/espresso-detail.jpg" alt="LAMOSE 4oz titanium espresso cup" />
+          <div class="hero-flower" aria-hidden="true"><i></i><i></i><i></i></div>
+          <p>4 OZ TITANIUM<br /><span>ICE-FLOWER FINISH</span></p>
+        </div>
+        <p class="hero-note">A QUIET LITTLE TRICK<br /><span>20–35 SEC · 3 ROUNDS</span></p>
+      </section>
+
+      <section class="character">
+        <div class="character-heading"><p class="eyebrow">THE REAL LITTLE 6</p><h2>不是一只“类似的猫”，<br />而是她本人。</h2><p>官网照片锁定脸部花纹和性格；版画头像成为游戏美术母版。缺失的动作由同类燕尾服猫姿态补足，但不改变她的识别特征。</p></div>
+        <div class="character-reference">
+          <figure class="photo-reference"><img src="./images/little6-photo.jpg" alt="Official photograph of Little 6, a black and white tuxedo cat" /><figcaption>OFFICIAL PHOTO · FACE MARKINGS</figcaption></figure>
+          <figure class="engraving-reference"><img src="./images/little6-avatar.png" alt="Official engraved portrait of Little 6" /><figcaption>OFFICIAL AVATAR · ART MASTER</figcaption></figure>
+          <div class="trait-list"><p><span>01</span> BLACK EARS + CROWN</p><p><span>02</span> WHITE CENTER BLAZE</p><p><span>03</span> GREEN-GOLD EYES</p><p><span>04</span> PINK NOSE + WHITE PAWS</p></div>
+        </div>
+      </section>
+
+      <section class="slice" id="slice">
+        <div class="slice-heading"><p class="eyebrow">CLASSIC SHELL GAME</p><h2>Where did<br /><em>Six</em> hide it?</h2><p>展示、遮盖、换位、选择、揭晓。猫爪推动三只杯子，产品本身就是玩法，不需要被变形成别的道具。</p></div>
+        <div class="phone-stage">
+          <div class="phone" data-phase="idle">
+            <div class="phone-top"><span id="roundLabel">ROUND 1 / 3</span><span class="flower-score" aria-label="0 of 3 ice flowers"><i></i><i></i><i></i></span></div>
+            <div class="game-wall"><span class="window-light"></span><span class="frame-line"></span></div>
+            <div class="game-cat"><img src="./src/assets/little6-papercut.svg" alt="黑白剪纸造型的 Little 6 从桌后观察" /></div>
+            <div class="game-status" aria-live="polite"><small>LITTLE 6 SAYS</small><strong id="gameStatus">FIND THE FLOWER</strong></div>
+            <div class="table-surface"></div>
+            <div class="paw paw-left" id="gamePaw" aria-hidden="true"><i></i></div>
+            <div class="ice-flower game-flower" id="gameFlower" aria-hidden="true"><img src="./src/assets/ice-flower.svg" alt="" /></div>
+            <div class="cup-row" aria-label="Choose one of three titanium cups">
+              <button class="shell-cup cup-one" type="button" data-cup="0" aria-label="选择左边的杯子"><span class="cup-body"><i></i><b></b></span><span class="cup-shadow"></span></button>
+              <button class="shell-cup cup-two" type="button" data-cup="1" aria-label="选择中间的杯子"><span class="cup-body"><i></i><b></b></span><span class="cup-shadow"></span></button>
+              <button class="shell-cup cup-three" type="button" data-cup="2" aria-label="选择右边的杯子"><span class="cup-body"><i></i><b></b></span><span class="cup-shadow"></span></button>
+            </div>
+            <div class="choice-timer" id="choiceTimer" aria-hidden="true"><i></i></div>
+            <p class="tap-hint" id="tapHint">WATCH · TRACK · CHOOSE</p>
+            <button class="reset-demo" id="resetDemo" type="button">RESET</button>
+            <div class="game-overlay" id="gameOverlay">
+              <div class="game-overlay__paper">
+                <p class="game-overlay__kicker" id="overlayKicker">LITTLE 6 PRESENTS</p>
+                <h3 id="overlayTitle">Find the ice flower.</h3>
+                <p id="overlayBody">Watch which titanium cup covers it, then follow every move.</p>
+                <div class="game-overlay__product" id="overlayProduct" hidden>
+                  <img src="./images/espresso-hero.jpg" alt="LAMOSE 4oz titanium espresso cups" />
+                  <span id="resultScore">0 / 3 FLOWERS</span>
+                </div>
+                <div class="game-overlay__actions">
+                  <button class="game-action" id="primaryGameAction" type="button">START GAME</button>
+                  <a class="game-shop-link" id="gameShopLink" href="https://little6.co/products/lamose-titanium-espresso-cup-4oz-petite?utm_source=game&amp;utm_medium=interactive&amp;utm_campaign=six_hid_it" target="_blank" rel="noreferrer" hidden>MEET THE 4OZ CUP <span>↗</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="slice-notes">
+            <article><span>01</span><div><h3>猫爪制造事件</h3><p>白爪放下冰花、盖杯并推杯换位；Little 6 的眼睛始终跟随目标。</p></div></article>
+            <article><span>02</span><div><h3>钛杯保持原貌</h3><p>三只杯只做平移、旋转和抬起，圆筒比例、厚杯沿和冰花质感不被改变。</p></div></article>
+            <article><span>03</span><div><h3>完整三轮</h3><p>点击开始后会随机藏花、逐轮加速洗杯；连续找到三次即可进入产品结算。</p></div></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="motion-story">
+        <div><p class="eyebrow">ONE ROUND / FIVE BEATS</p><h2>她的动作，<br />就是游戏节奏。</h2></div>
+        <ol><li><span>01</span><b>PLACE</b><p>白爪放下冰花。</p></li><li><span>02</span><b>COVER</b><p>钛杯轻落，盖住晶体。</p></li><li><span>03</span><b>SHUFFLE</b><p>三至七次相邻换位。</p></li><li><span>04</span><b>CHOOSE</b><p>玩家点击一只杯子。</p></li><li><span>05</span><b>REVEAL</b><p>猫爪抬杯，Little 6 眨眼。</p></li></ol>
+      </section>
+
+      <section class="result">
+        <div class="result-card">
+          <div class="result-seal"><img src="./images/little6-avatar.png" alt="Little 6 brand seal" /></div>
+          <p>ICE FLOWER / COMPLETE</p><h2>You found<br />what Six hid.</h2>
+          <div class="result-product"><img src="./images/espresso-hero.jpg" alt="LAMOSE 4oz titanium espresso cups" /></div>
+          <a href="https://little6.co/products/lamose-titanium-espresso-cup-4oz-petite?utm_source=game&utm_medium=interactive&utm_campaign=six_hid_it" target="_blank" rel="noreferrer">Meet the 4oz Cup <span>↗</span></a>
+        </div>
+        <div class="result-copy"><p class="eyebrow">RESULT → SHOP</p><h2>Little 6 负责记忆，<br />真实产品负责转化。</h2><p>完成三轮后，猫的版画签章、真实产品摄影和购买入口同时出现。用户记住的不只是一次猜杯，而是“那只会藏冰花的 Little 6”。</p></div>
+      </section>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

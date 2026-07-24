@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta name="game-uuid" content="f114b765-6d1e-4db6-98e1-76ee16ca10f6" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4f0e8" />
+    <title>Six Hid It — Little 6</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@500;600;700&family=Noto+Sans+SC:wght@500;600;700&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://images.aiwaves.tech/alteru/guest-shell.js" defer></script>
+  </head>
+  <body class="standalone-game">
+    <main class="standalone-game__stage">
+      <div class="phone" data-phase="idle">
+        <div class="phone-top"><span id="roundLabel">ROUND 1 / 3</span><span class="flower-score" aria-label="0 of 3 ice flowers"><i></i><i></i><i></i></span></div>
+        <div class="game-wall"><span class="window-light"></span><span class="frame-line"></span></div>
+        <div class="game-cat"><img src="./src/assets/little6-papercut.svg" alt="黑白剪纸造型的 Little 6 从桌后观察" /></div>
+        <div class="game-status" aria-live="polite"><small>LITTLE 6 SAYS</small><strong id="gameStatus">FIND THE FLOWER</strong></div>
+        <div class="table-surface"></div>
+        <div class="paw paw-left" id="gamePaw" aria-hidden="true"><i></i></div>
+        <div class="ice-flower game-flower" id="gameFlower" aria-hidden="true"><img src="./src/assets/ice-flower.svg" alt="" /></div>
+        <div class="cup-row" aria-label="Choose one of three titanium cups">
+          <button class="shell-cup cup-one" type="button" data-cup="0" aria-label="选择左边的杯子"><span class="cup-body"><i></i><b></b></span><span class="cup-shadow"></span></button>
+          <button class="shell-cup cup-two" type="button" data-cup="1" aria-label="选择中间的杯子"><span class="cup-body"><i></i><b></b></span><span class="cup-shadow"></span></button>
+          <button class="shell-cup cup-three" type="button" data-cup="2" aria-label="选择右边的杯子"><span class="cup-body"><i></i><b></b></span><span class="cup-shadow"></span></button>
+        </div>
+        <div class="choice-timer" id="choiceTimer" aria-hidden="true"><i></i></div>
+        <p class="tap-hint" id="tapHint">WATCH · TRACK · CHOOSE</p>
+        <button class="reset-demo" id="resetDemo" type="button">RESET</button>
+        <div class="game-overlay" id="gameOverlay">
+          <div class="game-overlay__paper">
+            <p class="game-overlay__kicker" id="overlayKicker">LITTLE 6 PRESENTS</p>
+            <h3 id="overlayTitle">Find the ice flower.</h3>
+            <p id="overlayBody">Watch which titanium cup covers it, then follow every move.</p>
+            <div class="game-overlay__product" id="overlayProduct" hidden>
+              <img src="./images/espresso-hero.jpg" alt="LAMOSE 4oz titanium espresso cups" />
+              <span id="resultScore">0 / 3 FLOWERS</span>
+            </div>
+            <div class="game-overlay__actions">
+              <button class="game-action" id="primaryGameAction" type="button">START GAME</button>
+              <a class="game-shop-link" id="gameShopLink" href="https://little6.co/products/lamose-titanium-espresso-cup-4oz-petite?utm_source=game&amp;utm_medium=interactive&amp;utm_campaign=six_hid_it" target="_blank" rel="noreferrer" hidden>MEET THE 4OZ CUP <span>↗</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

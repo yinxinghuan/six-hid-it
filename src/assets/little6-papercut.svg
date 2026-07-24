@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 250" role="img" aria-labelledby="title desc">
+  <title id="title">Little 6 cut-paper cat</title>
+  <desc id="desc">A symmetrical black and white tuxedo cat face assembled from cut-paper shapes.</desc>
+  <defs>
+    <filter id="paperShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#2e2b28" flood-opacity=".18"/>
+    </filter>
+  </defs>
+  <g filter="url(#paperShadow)">
+    <path fill="#2e2b28" d="M112 42h56l92 88-102 70h-36L20 130Z"/>
+    <path fill="#2e2b28" d="M24 10 104 64l8-18h56l8 18 80-54 8 14-16 100-40 21-50 53h-36l-50-53-40-21L16 24Z"/>
+    <path fill="#57514c" d="M38 30 92 65 44 103Z"/>
+    <path fill="#57514c" d="M242 30 188 65 236 103Z"/>
+    <path fill="#77706a" d="M50 44 78 65 50 84Z"/>
+    <path fill="#77706a" d="M230 44 202 65 230 84Z"/>
+    <path fill="#fbf8f2" d="m140 64 56 92-42 34h-28l-42-34Z"/>
+    <path fill="#f2eee7" d="m140 164-28 12 28 7Z"/>
+    <path fill="#e8e2d8" d="m140 164 28 12-28 7Z"/>
+    <path fill="#fbf8f2" d="M72 111c15-13 39-13 55 2-11 23-40 27-59 8Z"/>
+    <path fill="#fbf8f2" d="M208 111c-15-13-39-13-55 2 11 23 40 27 59 8Z"/>
+    <ellipse cx="99" cy="117" rx="16" ry="15" fill="#aaa96f"/>
+    <ellipse cx="181" cy="117" rx="16" ry="15" fill="#aaa96f"/>
+    <ellipse cx="99" cy="117" rx="4" ry="13" fill="#191817"/>
+    <ellipse cx="181" cy="117" rx="4" ry="13" fill="#191817"/>
+    <circle cx="94" cy="110" r="3" fill="#fbf8f2"/>
+    <circle cx="176" cy="110" r="3" fill="#fbf8f2"/>
+    <path fill="none" stroke="#8f8882" stroke-width="4.5" stroke-linecap="round" d="M76 91q25-6 36 9"/>
+    <path fill="none" stroke="#8f8882" stroke-width="4.5" stroke-linecap="round" d="M204 91q-25-6-36 9"/>
+    <path fill="#c9a7a0" d="m140 165-10-7h20Z"/>
+    <path fill="none" stroke="#2e2b28" stroke-width="3" stroke-linecap="round" d="M140 166v10m0 0-10 7m10-7 10 7"/>
+    <path fill="none" stroke="#2e2b28" stroke-width="2.5" stroke-linecap="round" d="M116 170Q88 164 60 174m56 3q-28-1-44 21m92-28q28-6 56 4m-56 3q28-1 44 21"/>
+  </g>
+</svg>
