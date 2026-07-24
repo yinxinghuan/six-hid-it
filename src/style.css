@@ -845,3 +845,66 @@ body.standalone-game{
     transform:translateX(0) rotate(0)!important;
   }
 }
+
+/* Cat staging: her whole head hides, watches, and peeks—not only her eyes. */
+.game-cat{
+  left:calc(50% - 155px);
+  top:28px;
+  width:310px;
+  height:277px;
+  transform:translateY(0);
+  transition:transform 360ms cubic-bezier(.22,.72,.22,1);
+}
+.phone[data-phase="idle"] .game-cat{
+  transform:translateY(18px);
+}
+.phone[data-phase="place"] .game-cat,
+.phone[data-phase="cover"] .game-cat,
+.phone[data-phase="shuffle"] .game-cat{
+  transform:translateY(32px);
+}
+.phone.is-cat-emerging .game-cat{
+  animation:six-cat-emerge 520ms cubic-bezier(.18,.78,.2,1);
+}
+.phone.is-probing .game-cat{
+  animation:six-cat-peek-nudge 420ms cubic-bezier(.18,.78,.2,1);
+}
+.phone.is-anticipating .game-cat{
+  animation:six-cat-crouch 180ms cubic-bezier(.45,0,.8,.45) forwards;
+}
+.phone.is-contact .game-cat{
+  transform:translateY(-6px) rotate(var(--cat-lean,0deg));
+}
+@keyframes six-cat-emerge{
+  0%{transform:translateY(32px)}
+  68%{transform:translateY(-7px)}
+  84%{transform:translateY(2px)}
+  100%{transform:translateY(0)}
+}
+@keyframes six-cat-peek-nudge{
+  0%,100%{transform:translateY(0) rotate(0)}
+  46%{transform:translateY(-9px) rotate(var(--cat-lean,0deg))}
+  72%{transform:translateY(-5px) rotate(var(--cat-lean,0deg))}
+}
+@keyframes six-cat-crouch{
+  from{transform:translateY(0) rotate(var(--cat-lean,0deg))}
+  to{transform:translateY(7px) rotate(var(--cat-lean,0deg))}
+}
+@media(max-width:340px){
+  .game-cat{
+    left:calc(50% - 135px);
+    top:4px;
+    width:270px;
+    height:241px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .phone.is-cat-emerging .game-cat,
+  .phone.is-probing .game-cat,
+  .phone.is-anticipating .game-cat{
+    animation:none!important;
+  }
+  .phone[data-phase="choose"] .game-cat{
+    transform:translateY(0);
+  }
+}

@@ -147,8 +147,17 @@ let probeCount = 0;
 let nudgeLocked = false;
 
 function setPhase(nextPhase) {
+  const shouldEmerge = nextPhase === 'choose' && phase !== 'choose';
   phase = nextPhase;
   phone.dataset.phase = nextPhase;
+  phone.classList.remove('is-cat-emerging');
+  if (shouldEmerge) {
+    void phone.offsetWidth;
+    phone.classList.add('is-cat-emerging');
+    window.setTimeout(() => {
+      if (phase === 'choose') phone.classList.remove('is-cat-emerging');
+    }, reducedMotion ? 80 : 540);
+  }
 }
 
 function wait(ms) {
