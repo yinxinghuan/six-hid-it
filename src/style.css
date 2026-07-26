@@ -548,9 +548,9 @@ body.standalone-game{
 .cat-pupil{
   position:absolute;
   z-index:2;
-  top:42%;
-  width:8px;
-  height:24px;
+  top:41.4%;
+  width:10px;
+  height:27px;
   border-radius:50%;
   background:var(--ink);
   transform:translateX(var(--gaze-x,0)) scaleY(var(--pupil-scale,1));
@@ -567,8 +567,8 @@ body.standalone-game{
   border-radius:50%;
   background:rgba(251,248,242,.9);
 }
-.cat-pupil-left{left:33.9%}
-.cat-pupil-right{left:63.2%}
+.cat-pupil-left{left:33.6%}
+.cat-pupil-right{left:62.9%}
 .cat-brow{
   position:absolute;
   z-index:3;
