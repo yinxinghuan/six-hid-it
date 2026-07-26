@@ -398,7 +398,7 @@ function resetCupPresentation() {
     ['--probe-x', '--probe-rot', '--wobble-x', '--wobble-rot', '--wobble-back-x', '--wobble-back-rot', '--wobble-settle-x', '--wobble-settle-rot', '--kick-x', '--kick-y', '--kick-rot', '--land-x', '--land-rot', '--bounce-rot', '--bump-x', '--bump-back-x', '--bump-settle-x', '--bump-rot', '--bump-back-rot']
       .forEach((property) => cup.style.removeProperty(property));
   });
-  gameFlower.classList.remove('is-visible');
+  gameFlower.classList.remove('is-visible', 'is-revealing');
   gamePaw.classList.remove('is-placing', 'is-pointing', 'from-right', 'is-nudging', 'is-anticipating', 'is-swinging', 'is-following');
   gamePaw.style.removeProperty('--paw-x');
   gamePaw.style.removeProperty('--paw-y');
@@ -740,6 +740,7 @@ async function revealChoice(selectedCup, timedOut = false) {
 
   answerCup.classList.remove('is-braced', 'is-contact');
   answerCup.classList.add('is-answer', 'is-tumbling');
+  gameFlower.classList.add('is-visible', 'is-revealing');
   gamePaw.classList.remove('is-swinging');
   gamePaw.classList.add('is-following');
   phone.classList.remove('is-contact');
@@ -748,7 +749,6 @@ async function revealChoice(selectedCup, timedOut = false) {
   impactMark.classList.add('is-visible');
   phone.classList.add('is-impact');
   adjacentCup?.classList.add('is-bumped');
-  gameFlower.classList.add('is-visible');
   sound.land();
   navigator.vibrate?.([18, 35, 8]);
   showRoundResult(isCorrect, timedOut);

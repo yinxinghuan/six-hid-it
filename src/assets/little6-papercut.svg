@@ -16,12 +16,12 @@
     <path fill="#fbf8f2" d="m140 64 56 92-42 34h-28l-42-34Z"/>
     <path fill="#f2eee7" d="m140 164-28 12 28 7Z"/>
     <path fill="#e8e2d8" d="m140 164 28 12-28 7Z"/>
-    <path fill="#fbf8f2" d="M72 111c15-13 39-13 55 2-11 23-40 27-59 8Z"/>
-    <path fill="#fbf8f2" d="M208 111c-15-13-39-13-55 2 11 23 40 27 59 8Z"/>
-    <ellipse cx="99" cy="117" rx="16" ry="15" fill="#aaa96f"/>
-    <ellipse cx="181" cy="117" rx="16" ry="15" fill="#aaa96f"/>
+    <path fill="#fbf8f2" d="M66 109c17-15 45-15 64 3-12 27-46 32-68 10Z"/>
+    <path fill="#fbf8f2" d="M214 109c-17-15-45-15-64 3 12 27 46 32 68 10Z"/>
+    <ellipse cx="99" cy="117" rx="18.5" ry="17.5" fill="#aaa96f"/>
+    <ellipse cx="181" cy="117" rx="18.5" ry="17.5" fill="#aaa96f"/>
     <path fill="#c9a7a0" d="m140 165-10-7h20Z"/>
     <path fill="none" stroke="#2e2b28" stroke-width="3" stroke-linecap="round" d="M140 166v10m0 0-10 7m10-7 10 7"/>
-    <path fill="none" stroke="#2e2b28" stroke-width="2.5" stroke-linecap="round" d="M116 170Q88 164 60 174m56 3q-28-1-44 21m92-28q28-6 56 4m-56 3q28-1 44 21"/>
+    <path fill="none" stroke="#2e2b28" stroke-width="2.5" stroke-linecap="round" d="M116 164Q88 155 58 162m58 9q-28-6-52 10m100-17q28-9 58-2m-58 9q28-6 52 10"/>
   </g>
 </svg>
