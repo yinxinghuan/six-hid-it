@@ -155,6 +155,7 @@ let metalNoiseBuffer;
 let probeCupId = -1;
 let probeCount = 0;
 let nudgeLocked = false;
+let gazeMotionTimeout = 0;
 
 function setPhase(nextPhase) {
   const shouldEmerge = nextPhase === 'choose' && phase !== 'choose';
@@ -409,7 +410,10 @@ function resetCupPresentation() {
   roundResult.setAttribute('aria-hidden', 'true');
   roundResultTitle.textContent = '';
   roundResultDetail.textContent = '';
-  phone.classList.remove('is-probing', 'is-anticipating', 'is-contact', 'is-impact', 'is-correct', 'is-failed', 'gaze-left', 'gaze-center', 'gaze-right');
+  window.clearTimeout(gazeMotionTimeout);
+  gazeMotionTimeout = 0;
+  phone.dataset.effort = '0';
+  phone.classList.remove('is-probing', 'is-anticipating', 'is-contact', 'is-impact', 'is-correct', 'is-failed', 'is-eye-tracking', 'gaze-left', 'gaze-center', 'gaze-right');
   probeCupId = -1;
   probeCount = 0;
   nudgeLocked = false;
@@ -466,12 +470,19 @@ function showIdle() {
 async function swapAdjacent(pairIndex, duration, step, token) {
   const firstCup = slotsByCup.indexOf(pairIndex);
   const secondCup = slotsByCup.indexOf(pairIndex + 1);
+  const outerSlot = pairIndex === 0 ? 0 : 2;
+  const gazeStartsOutside = step % 2 === 0;
+  setCatGaze(gazeStartsOutside ? outerSlot : 1, 0, true);
   [slotsByCup[firstCup], slotsByCup[secondCup]] = [slotsByCup[secondCup], slotsByCup[firstCup]];
   cups.forEach((cup) => cup.style.setProperty('--shuffle-duration', `${reducedMotion ? 80 : duration}ms`));
   layoutCups();
   sound.swap(step);
   updateHud();
-  return waitFor((reducedMotion ? 80 : duration) + 90, token);
+  const totalDuration = (reducedMotion ? 80 : duration) + 90;
+  const sweepDelay = reducedMotion ? 40 : Math.round(duration * 0.42);
+  if (!(await waitFor(sweepDelay, token))) return false;
+  setCatGaze(gazeStartsOutside ? 1 : outerSlot, 0, true);
+  return waitFor(totalDuration - sweepDelay, token);
 }
 
 async function beginRound(token) {
@@ -483,6 +494,7 @@ async function beginRound(token) {
   flowerCupId = Math.floor(Math.random() * 3);
   updateHud();
   positionFlower();
+  setCatGaze(slotsByCup[flowerCupId], 0, true);
   setOverlay('hidden');
   setPhase('place');
   gameStatus.textContent = t('place');
@@ -517,6 +529,7 @@ async function beginRound(token) {
   if (token !== runToken) return;
   cups.forEach((cup) => cup.style.removeProperty('--shuffle-duration'));
   setPhase('choose');
+  setCatGaze(1, 0, true);
   setCupsEnabled(true);
   gameStatus.textContent = t('choose');
   tapHint.textContent = t('chooseHint');
@@ -535,10 +548,19 @@ function startGame() {
   beginRound(token);
 }
 
-function setCatGaze(slot, effort = 0) {
+function setCatGaze(slot, effort = 0, animate = false) {
   phone.classList.remove('gaze-left', 'gaze-center', 'gaze-right');
   phone.classList.add(slot === 0 ? 'gaze-left' : slot === 2 ? 'gaze-right' : 'gaze-center');
   phone.dataset.effort = String(effort);
+  if (!animate || reducedMotion) return;
+  window.clearTimeout(gazeMotionTimeout);
+  phone.classList.remove('is-eye-tracking');
+  void phone.offsetWidth;
+  phone.classList.add('is-eye-tracking');
+  gazeMotionTimeout = window.setTimeout(() => {
+    phone.classList.remove('is-eye-tracking');
+    gazeMotionTimeout = 0;
+  }, 280);
 }
 
 function configurePawForCup(cup) {
@@ -648,7 +670,7 @@ async function nudgeCup(cup) {
 
   const visibleLevel = 1;
   const slot = slotsByCup[cupId];
-  setCatGaze(slot, visibleLevel);
+  setCatGaze(slot, visibleLevel, true);
   configurePawForCup(cup);
   setCupProbe(cup, visibleLevel);
   cup.classList.add('is-nudging');
@@ -697,7 +719,7 @@ async function revealChoice(selectedCup, timedOut = false) {
   const adjacentSlot = answerSlot + direction;
   const adjacentCupId = slotsByCup.indexOf(adjacentSlot);
   const adjacentCup = adjacentCupId >= 0 ? cups[adjacentCupId] : null;
-  setCatGaze(answerSlot, 3);
+  setCatGaze(answerSlot, 3, true);
   configurePawForCup(answerCup);
   answerCup.style.setProperty('--probe-x', '0px');
   answerCup.style.setProperty('--probe-rot', '0deg');

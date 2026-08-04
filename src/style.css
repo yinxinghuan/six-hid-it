@@ -548,14 +548,14 @@ body.standalone-game{
 .cat-pupil{
   position:absolute;
   z-index:2;
-  top:41.4%;
-  width:10px;
-  height:27px;
+  top:41%;
+  width:12px;
+  height:29px;
   border-radius:50%;
   background:var(--ink);
-  transform:translateX(var(--gaze-x,0)) scaleY(var(--pupil-scale,1));
+  transform:translate(var(--gaze-x,0),var(--gaze-y,0)) scaleY(var(--pupil-scale,1));
   transform-origin:center;
-  transition:transform 180ms cubic-bezier(.2,.8,.2,1),height 180ms ease;
+  transition:transform 140ms cubic-bezier(.18,.84,.24,1),height 140ms ease;
 }
 .cat-pupil:after{
   content:"";
@@ -567,8 +567,8 @@ body.standalone-game{
   border-radius:50%;
   background:rgba(251,248,242,.9);
 }
-.cat-pupil-left{left:33.6%}
-.cat-pupil-right{left:62.9%}
+.cat-pupil-left{left:33.2%}
+.cat-pupil-right{left:62.5%}
 .cat-brow{
   position:absolute;
   z-index:3;
@@ -582,12 +582,15 @@ body.standalone-game{
 }
 .cat-brow-left{left:23.5%;transform:rotate(8deg)}
 .cat-brow-right{right:23.5%;transform:rotate(-8deg)}
-.phone.gaze-left{--gaze-x:-5px;--cat-lean:-1.6deg}
-.phone.gaze-center{--gaze-x:0;--cat-lean:0deg}
-.phone.gaze-right{--gaze-x:5px;--cat-lean:1.6deg}
-.phone[data-effort="1"]{--pupil-scale:.92}
-.phone[data-effort="2"]{--pupil-scale:.78}
-.phone[data-effort="3"]{--pupil-scale:.62}
+.phone.gaze-left{--gaze-x:-7px;--gaze-y:2px;--cat-lean:-1.6deg}
+.phone.gaze-center{--gaze-x:0;--gaze-y:3px;--cat-lean:0deg}
+.phone.gaze-right{--gaze-x:7px;--gaze-y:2px;--cat-lean:1.6deg}
+.phone[data-effort="1"]{--pupil-scale:.96}
+.phone[data-effort="2"]{--pupil-scale:.86}
+.phone[data-effort="3"]{--pupil-scale:.72}
+.phone.is-eye-tracking .cat-pupil{
+  animation:six-pupil-focus 260ms cubic-bezier(.18,.84,.24,1);
+}
 .phone[data-effort="2"] .cat-brow-left,
 .phone[data-effort="3"] .cat-brow-left{top:36%;transform:rotate(16deg)}
 .phone[data-effort="2"] .cat-brow-right,
@@ -717,6 +720,10 @@ body.standalone-game{
   0%,100%{transform:translateY(0) rotate(0)}
   55%{transform:translateY(3px) rotate(var(--cat-lean,0deg))}
 }
+@keyframes six-pupil-focus{
+  0%,100%{scale:1}
+  48%{scale:1.12 1.06}
+}
 @keyframes six-cat-anticipate{
   from{transform:translateY(0) rotate(var(--cat-lean,0deg)) scaleY(1)}
   to{transform:translateY(6px) rotate(var(--cat-lean,0deg)) scaleY(.985)}
@@ -776,6 +783,9 @@ body.standalone-game{
   .shell-cup.is-bumped,
   .impact-mark.is-visible,
   .phone.is-impact{
+    animation:none!important;
+  }
+  .phone.is-eye-tracking .cat-pupil{
     animation:none!important;
   }
   .shell-cup.is-answer.is-tumbling{
